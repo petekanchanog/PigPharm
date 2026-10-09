@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pig Pharm Pro - ระบบจัดการยาสุกรและประเมินโรคอัจฉริยะ</title>
+    <!-- Google Fonts & Tailwind CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Prompt', 'sans-serif'] },
+                    colors: {
+                        emerald: {
+                            50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7',
+                            400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857',
+                            800: '#065f46', 900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
+        .glass-card { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
+    </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col bg-slate-100">
+
+    <!-- ================= TOP NAVIGATION ================= -->
+    <header class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('diagnosis')">
+                    <div class="w-11 h-11 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30 transform hover:scale-105 transition-all">
+                        <span class="text-2xl">🐷</span>
+                    </div>
+                    <div>
+                        <div class="font-extrabold text-lg leading-tight flex items-center gap-2">
+                            Pig Pharm <span class="bg-emerald-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Pro</span>
+                        </div>
+                        <div class="text-[11px] text-emerald-300 font-medium flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span id="header-farm-display">ฟาร์มสุกรมาตรฐาน GAP (พร้อมใช้งาน)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <button onclick="navigateTo('diagnosis')" id="nav-btn-diagnosis" class="nav-tab px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-emerald-700/80 text-white shadow-inner">
+                        🩺 <span>ประเมินอาการ</span>
+                    </button>
+                    <button onclick="navigateTo('calculator')" id="nav-btn-calculator" class="nav-tab px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2">
+                        🧮 <span>คำนวณยา & สารเสริม</span>
+                    </button>
+                    <button onclick="navigateTo('formulary')" id="nav-btn-formulary" class="nav-tab px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2">
+                        💊 <span>คลังยา & สารเสริม</span>
+                    </button>
+                    <button onclick="navigateTo('logs')" id="nav-btn-logs" class="nav-tab px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 relative">
+                        📋 <span>บันทึกการรักษา</span>
+                        <span id="badge-active-logs" class="hidden absolute -top-1 -right-1 bg-amber-500 text-slate-900 font-bold text-[10px] px-1.5 py-0.2 rounded-full shadow">0</span>
+                    </button>
+                    <button onclick="navigateTo('admin')" id="nav-btn-admin" class="nav-tab px-3.5 py-2 rounded-xl text-sm font-semibold text-emerald-300 hover:text-white hover:bg-emerald-600/30 transition-all flex items-center gap-2 border border-emerald-500/40">
+                        ⚙️ <span>ADMIN</span>
+                    </button>
+                </nav>
+
+                <!-- Quick Farm Settings / Actions -->
+                <div class="flex items-center gap-2">
+                    <button onclick="openFarmSettingsModal()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10">
+                        🏡 <span class="hidden sm:inline" id="btn-farm-name">ตั้งค่าข้อมูลฟาร์ม</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Scrollable Bar -->
+        <div class="md:hidden flex border-t border-emerald-800/80 bg-slate-900/90 overflow-x-auto text-xs py-2 px-2 gap-1 custom-scrollbar">
+            <button onclick="navigateTo('diagnosis')" id="mob-nav-diagnosis" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-emerald-700 text-white font-medium">🩺 ประเมินอาการ</button>
+            <button onclick="navigateTo('calculator')" id="mob-nav-calculator" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-white/10 text-slate-200">🧮 คำนวณยา</button>
+            <button onclick="navigateTo('formulary')" id="mob-nav-formulary" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-white/10 text-slate-200">💊 คลังยา & สารเสริม</button>
+            <button onclick="navigateTo('logs')" id="mob-nav-logs" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-white/10 text-slate-200">📋 บันทึกประวัติ</button>
+            <button onclick="navigateTo('admin')" id="mob-nav-admin" class="px-3 py-1.5 rounded-lg whitespace-nowrap bg-emerald-600/40 text-emerald-200 border border-emerald-500/30 font-medium">⚙️ ADMIN</button>
+        </div>
+    </header>
+
+    <!-- ================= MAIN CONTAINER ================= -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+        <!-- ================= 1. DIAGNOSIS PAGE ================= -->
+        <section id="page-diagnosis" class="space-y-6 animate-fade-in">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-800 rounded-3xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border border-emerald-700/40">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/30 border border-emerald-400/40 rounded-full text-xs font-semibold text-emerald-200 mb-2">
+                        🧠 Smart Diagnosis
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">ระบบประเมินอาการสุกร</h1>
+                    <p class="text-emerald-100 text-sm mt-1 max-w-2xl">
+                        วิเคราะห์กลุ่มโรคตามระยะการเลี้ยงและกลุ่มอาการ
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="resetDiagnosis()" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-2xl backdrop-blur-md transition-all border border-white/20 flex items-center gap-1.5">
+                        🔄 <span>ล้างอาการที่เลือก</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Standard Farm Management Card for Selected Stage -->
+            <div class="bg-gradient-to-br from-slate-900 to-teal-950 rounded-2xl p-5 text-white shadow-sm border border-emerald-800">
+                <div class="flex items-center justify-between pb-3 border-b border-teal-800 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">🌡️</span>
+                        <h3 class="font-bold text-sm sm:text-base text-emerald-300" id="std-stage-title">มาตรฐานการจัดการ : สุกรรุ่น-สุกรขุน (30 - 110+ กก.)</h3>
+                    </div>
+                    <span class="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold rounded-full border border-emerald-400/30">มาตรฐาน GAP</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs" id="std-cards-grid">
+                    <div class="bg-white/10 p-3 rounded-xl border border-white/10">
+                        <div class="text-slate-300 text-[11px]">🌡️ อุณหภูมิเหมาะสม</div>
+                        <div class="text-base font-extrabold text-white mt-1" id="std-temp">24 - 27 °C</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5" id="std-temp-sub">ห้ามเกิน 30°C เสี่ยง Heat stress</div>
+                    </div>
+                    <div class="bg-white/10 p-3 rounded-xl border border-white/10">
+                        <div class="text-slate-300 text-[11px]">💨 ความเร็วลม Evap</div>
+                        <div class="text-base font-extrabold text-white mt-1" id="std-wind">1.5 - 2.0 m/s</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">ระบายแอมโมเนียและความชื้น</div>
+                    </div>
+                    <div class="bg-white/10 p-3 rounded-xl border border-white/10">
+                        <div class="text-slate-300 text-[11px]">🌾 อัตราการกินอาหาร</div>
+                        <div class="text-base font-extrabold text-white mt-1" id="std-feed">1.8 - 3.0 กก./วัน</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">~3.5 - 4% ของน้ำหนักตัว</div>
+                    </div>
+                    <div class="bg-white/10 p-3 rounded-xl border border-white/10">
+                        <div class="text-slate-300 text-[11px]">💧 ปริมาณน้ำดื่ม</div>
+                        <div class="text-base font-extrabold text-white mt-1" id="std-water">6 - 10 ลิตร/วัน</div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">อัตราไหลจุ๊บ 1.5 - 2.0 L/min</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Layout: 3 Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left 5 Cols: Stage & Symptom Selection -->
+                <div class="lg:col-span-5 space-y-5">
+                    <!-- Stage Selector Card -->
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80">
+                        <label class="block text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-extrabold">1</span>
+                            เลือกระยะการเลี้ยงของสุกร
+                        </label>
+                        <div class="grid grid-cols-2 gap-2.5" id="diag-stage-buttons">
+                            <button type="button" onclick="selectDiagStage('all')" class="stage-filter-btn active p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/80 text-emerald-900 font-bold text-xs text-left transition-all" data-stage="all">
+                                🌐 ทุกระยะการเลี้ยง<br><span class="text-[10px] text-slate-500 font-normal">ประเมินทุกกลุ่มอายุ</span>
+                            </button>
+                            <button type="button" onclick="selectDiagStage('suckling')" class="stage-filter-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-left hover:border-emerald-500 hover:bg-emerald-50/50 transition-all" data-stage="suckling">
+                                🍼 ลูกสุกรดูดนม<br><span class="text-[10px] text-slate-400 font-normal">0 - 3 สัปดาห์ (แรกคลอด)</span>
+                            </button>
+                            <button type="button" onclick="selectDiagStage('nursery')" class="stage-filter-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-left hover:border-emerald-500 hover:bg-emerald-50/50 transition-all" data-stage="nursery">
+                                🐖 สุกรอนุบาล<br><span class="text-[10px] text-slate-400 font-normal">3 - 10 สัปดาห์ (หย่านม)</span>
+                            </button>
+                            <button type="button" onclick="selectDiagStage('grower')" class="stage-filter-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-left hover:border-emerald-500 hover:bg-emerald-50/50 transition-all" data-stage="grower">
+                                🥓 สุกรรุ่น - ขุน<br><span class="text-[10px] text-slate-400 font-normal">10 สัปดาห์ขึ้นไป - ส่งตลาด</span>
+                            </button>
+                            <button type="button" onclick="selectDiagStage('sow')" class="stage-filter-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-left hover:border-emerald-500 hover:bg-emerald-50/50 transition-all col-span-2" data-stage="sow">
+                                👑 แม่พันธุ์อุ้มท้อง / เลี้ยงลูก & พ่อพันธุ์<br><span class="text-[10px] text-slate-400 font-normal">ระบบสืบพันธุ์ การคลอด และเต้านม</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Symptom Checklist Card -->
+                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-extrabold">2</span>
+                                เลือกอาการที่ตรวจพบในฝูงสุกร
+                            </label>
+                            <span id="selected-symptoms-count" class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">เลือก 0 อาการ</span>
+                        </div>
+
+                        <!-- Search symptom -->
+                        <div class="mb-3">
+                            <input type="text" id="diag-symptom-search" oninput="filterSymptomCheckboxes()" placeholder="🔍 พิมพ์ค้นหาอาการ เช่น ไอ, ขี้เหลือง, ข้อบวม, ชัก..." class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                        </div>
+
+                        <!-- Grouped Symptoms List -->
+                        <div class="space-y-3 max-h-[520px] overflow-y-auto pr-1 custom-scrollbar" id="diagnosis-symptoms-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 7 Cols: Evaluation Results & Recommended Protocols -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 min-h-[600px] flex flex-col">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                    📊 ผลการประเมินกลุ่มโรค & ยา-สารเสริมที่แนะนำ
+                                </h2>
+                                <p class="text-xs text-slate-500">คำนวณจาก Matched Matrix และหลักเภสัชวิทยาเวชกรรมสุกร</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="diag-result-badge" class="px-3 py-1 bg-slate-100 text-slate-600 font-bold text-xs rounded-full">
+                                    รอเลือกอาการ
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Results Container -->
+                        <div id="diag-cards-output" class="py-4 space-y-4 flex-1">
+                            <!-- Empty State Default -->
+                            <div class="text-center py-20 text-slate-400">
+                                <span class="text-6xl block mb-4">🩺</span>
+                                <h3 class="text-base font-bold text-slate-700">กรุณาเลือกระยะการเลี้ยงและติ๊กอาการทางซ้ายมือ</h3>
+                                <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">ระบบจะประเมินโรคที่มีโอกาสเกิดขึ้น เปอร์เซ็นต์ความน่าจะเป็น พร้อมจัดชุดยาฉีด ยาละลายน้ำ ยาผสมอาหาร และสารเสริมให้ทันที</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 2. CALCULATOR PAGE ================= -->
+        <section id="page-calculator" class="hidden space-y-6 animate-fade-in">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-teal-800 via-emerald-800 to-slate-800 rounded-3xl p-6 md:p-8 text-white shadow-lg border border-teal-700/40">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-teal-500/30 border border-teal-400/40 rounded-full text-xs font-semibold text-teal-200 mb-2">
+                    🧮 Precision Swine Dosage & Water/Feed
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">ระบบคำนวณขนาดยา ปริมาณสารเสริม และระยะหยุดยา</h1>
+                <p class="text-teal-100 text-sm mt-1 max-w-2xl">
+                    คำนวณแม่นยำตามน้ำหนักจริงของสุกร อัตรากินน้ำ (10% นน.ตัว) อัตรากินอาหาร (4% นน.ตัว)
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left 5 Cols: Input Parameters -->
+                <div class="lg:col-span-5 bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 space-y-5">
+                    <h3 class="font-bold text-slate-800 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
+                        <span>⚙️</span> ใส่ข้อมูลเพื่อคำนวณ
+                    </h3>
+
+                    <!-- Select Drug/Supplement -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">1. เลือกตัวยา / สารเสริมที่ต้องการใช้</label>
+                        <select id="calc-drug-select" onchange="onCalculatorDrugChange()" class="w-full px-3.5 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-semibold text-slate-800 bg-slate-50">
+                            <!-- Populated via JS -->
+                        </select>
+                    </div>
+
+                    <!-- Administration Route -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">2. ช่องทางการให้ยา</label>
+                        <div class="grid grid-cols-3 gap-2" id="calc-route-selector">
+                            <button type="button" onclick="setCalcRoute('inject')" id="route-btn-inject" class="route-btn p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold text-xs text-center transition-all">
+                                💉 ฉีดรายตัว<br><span class="text-[9px] font-normal text-slate-500">เข้ากล้ามเนื้อ</span>
+                            </button>
+                            <button type="button" onclick="setCalcRoute('water')" id="route-btn-water" class="route-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all">
+                                💧 ละลายน้ำกิน<br><span class="text-[9px] font-normal text-slate-400">ละลายน้ำกิน</span>
+                            </button>
+                            <button type="button" onclick="setCalcRoute('feed')" id="route-btn-feed" class="route-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all">
+                                🌾 ผสมอาหาร<br><span class="text-[9px] font-normal text-slate-400">ผสมอาหาร</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Herd & Body Weight Info -->
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                        <div class="text-xs font-bold text-slate-700">3. ข้อมูลสุกรที่เข้ารับการรักษา</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">จำนวนสุกร (ตัว)</label>
+                                <input type="number" id="calc-input-heads" value="50" min="1" oninput="runDosageCalculation()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">น้ำหนักเฉลี่ย (กก./ตัว)</label>
+                                <input type="number" id="calc-input-weight" value="35" min="0.5" step="0.5" oninput="runDosageCalculation()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 bg-white">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">ระยะเวลาให้ยา (วัน)</label>
+                                <input type="number" id="calc-input-days" value="3" min="1" oninput="runDosageCalculation()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-slate-600 mb-1">วันที่เริ่มให้ยา</label>
+                                <input type="date" id="calc-input-start-date" onchange="runDosageCalculation()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-800 bg-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">หมายเลขคอก / โรงเรือน (สำหรับบันทึก)</label>
+                            <input type="text" id="calc-input-pen" placeholder="เช่น โรงเรือนขุน 2 คอก 5" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm text-slate-800 bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Direct Save to Treatment Log Button -->
+                    <button type="button" onclick="saveDirectTreatmentLog()" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transform active:scale-95 transition-all text-sm">
+                        <span>💾</span> บันทึกเข้าประวัติการรักษา
+                    </button>
+                </div>
+
+                <!-- Right 7 Cols: Calculated Results Card -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 space-y-6">
+                        <!-- Drug Header Profile -->
+                        <div class="flex items-start justify-between pb-4 border-b border-slate-100 gap-4">
+                            <div class="flex items-center gap-3">
+                                <div id="calc-res-img-box" class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-3xl overflow-hidden shadow-inner">
+                                    💊
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h3 class="text-xl font-extrabold text-slate-800" id="calc-res-trade-name">แอมม็อกซี่ 15% LA</h3>
+                                        <span id="calc-res-category-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">ยาปฏิชีวนะ</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 font-medium mt-0.5" id="calc-res-generic-name">Amoxicillin Trihydrate 150 mg/ml</p>
+                                    <p class="text-[11px] text-teal-700 font-semibold mt-1" id="calc-res-indication">รักษาข้ออักเสบ, ปอดบวม, ทางเดินปัสสาวะและมดลูกอักเสบ (MMA)</p>
+                                </div>
+                            </div>
+                            <span id="calc-res-route-pill" class="px-3 py-1 bg-emerald-100 text-emerald-900 font-bold text-xs rounded-full whitespace-nowrap">
+                                💉 ฉีดเข้ากล้ามเนื้อ
+                            </span>
+                        </div>
+
+                        <!-- 3 Big Metric Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                            <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 text-center">
+                                <span class="text-xs font-semibold text-emerald-800 block">ปริมาณยาต่อตัว</span>
+                                <span class="text-3xl font-extrabold text-emerald-700 my-1 block tracking-tight" id="calc-val-per-head">3.50</span>
+                                <span class="text-[11px] font-medium text-emerald-600" id="calc-unit-per-head">ml / ตัว</span>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200/80 text-center">
+                                <span class="text-xs font-semibold text-teal-800 block">ปริมาณยารวมต่อวัน</span>
+                                <span class="text-3xl font-extrabold text-teal-700 my-1 block tracking-tight" id="calc-val-per-day">175.0</span>
+                                <span class="text-[11px] font-medium text-teal-600" id="calc-unit-per-day">ml / วัน (50 ตัว)</span>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 text-center">
+                                <span class="text-xs font-semibold text-slate-700 block">ปริมาณยารวมตลอดการรักษา</span>
+                                <span class="text-3xl font-extrabold text-slate-800 my-1 block tracking-tight" id="calc-val-grand-total">525.0</span>
+                                <span class="text-[11px] font-medium text-slate-500" id="calc-unit-grand-total">ml (สำหรับ 3 วัน)</span>
+                            </div>
+                        </div>
+
+                        <!-- Water & Feed Consumption Helper -->
+                        <div id="calc-intake-helper" class="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900 space-y-1">
+                            <div class="font-bold flex items-center gap-1.5">
+                                <span>💧</span> ข้อมูลการกินน้ำและอาหารของฝูงสุกร (มาตรฐานคำนวณ)
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-slate-700 pt-1">
+                                <div>• ปริมาณน้ำกินของฝูง: <span class="font-bold text-blue-800" id="calc-water-estimate">175 ลิตร/วัน</span> (10% นน.ตัว)</div>
+                                <div>• ปริมาณอาหารกินของฝูง: <span class="font-bold text-blue-800" id="calc-feed-estimate">70 กก./วัน</span> (4% นน.ตัว)</div>
+                            </div>
+                        </div>
+
+                        <!-- Withdrawal Period Banner -->
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3.5">
+                            <span class="text-2xl mt-0.5">⚠️</span>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-extrabold text-amber-900">ระยะหยุดยา (Withdrawal Period Notice)</h4>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-200 text-amber-900" id="calc-res-withdrawal-days">14 วัน</span>
+                                </div>
+                                <p class="text-xs text-amber-800 mt-1 leading-relaxed">
+                                    สุกรกลุ่มนี้จะ<span class="font-bold underline text-amber-950">พ้นระยะหยุดยาและสามารถส่งโรงเชือดได้อย่างปลอดภัยในวันที่:</span> 
+                                    <span class="font-extrabold text-emerald-800 text-sm ml-1" id="calc-res-safe-date">24 ต.ค. 2026</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Administration Instruction & Precautions -->
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                                <span>📌</span> ข้อแนะนำการให้ยา & ข้อควรระวังในการปฏิบัติงาน
+                            </div>
+                            <p class="text-slate-600 leading-relaxed" id="calc-res-directions">
+                                ฉีดเข้ากล้ามเนื้อลึก (IM) บริเวณหลังใบหู ไม่ควรฉีดยาเกิน 10 ml ในตำแหน่งเดียวกัน หากปริมาณยาเกินให้แยกฉีด 2 ข้าง
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 3. DRUG & SUPPLEMENT FORMULARY ================= -->
+        <section id="page-formulary" class="hidden space-y-6 animate-fade-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-emerald-800 to-teal-800 rounded-3xl p-6 text-white shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-emerald-700/40">
+                <div>
+                    <h1 class="text-2xl font-bold flex items-center gap-2">💊 คลังฐานข้อมูลยาและสารเสริม</h1>
+                    <p class="text-emerald-100 text-xs mt-1">ฐานข้อมูลยาปฏิชีวนะ ยาแก้อักเสบ ลดไข้</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="navigateTo('admin', 'drugs')" class="px-3.5 py-2 bg-white/20 hover:bg-white/30 text-white text-xs font-bold rounded-2xl backdrop-blur-md transition-all border border-white/20 flex items-center gap-1.5">
+                        ➕ <span>เพิ่ม/แก้ไขยาในระบบกลาง</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 custom-scrollbar" id="formulary-cat-filters">
+                    <button onclick="filterFormularyCategory('all')" class="cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white whitespace-nowrap">ทั้งหมด</button>
+                    <button onclick="filterFormularyCategory('antibiotic_inject')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">💉 ยาฉีด</button>
+                    <button onclick="filterFormularyCategory('water_soluble')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">💧 ละลายน้ำ</button>
+                    <button onclick="filterFormularyCategory('feed_premix')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🌾 ผสมอาหาร</button>
+                    <button onclick="filterFormularyCategory('nsaid')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🩹 ลดไข้-ลดอักเสบ</button>
+                    <button onclick="filterFormularyCategory('supplement')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🧪 สารเสริม/วิตามิน</button>
+                    <button onclick="filterFormularyCategory('antiparasitic')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🪱 กำจัดพยาธิ/ไร</button>
+                </div>
+                <div class="w-full md:w-72">
+                    <input type="text" id="formulary-search" oninput="renderFormularyGrid()" placeholder="🔍 ค้นหาชื่อยา, ตัวยาสำคัญ, สรรพคุณ..." class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+                </div>
+            </div>
+
+            <!-- Drug Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="formulary-cards-grid">
+                <!-- Populated via JS -->
+            </div>
+        </section>
+
+        <!-- ================= 4. TREATMENT LOGS (GAP STANDARD) ================= -->
+        <section id="page-logs" class="hidden space-y-6 animate-fade-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-emerald-800 to-teal-800 rounded-3xl p-6 text-white shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-emerald-700/40">
+                <div>
+                    <h1 class="text-2xl font-bold flex items-center gap-2">📋 สมุดบันทึกการรักษา</h1>
+                    <p class="text-emerald-100 text-xs mt-1">บันทึกประวัติการรักษา ตรวจสอบสถานะระยะหยุดยา</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportLogsToCSV()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-2xl shadow transition-all flex items-center gap-1.5">
+                        📥 <span>ส่งออก Excel</span>
+                    </button>
+                    <button onclick="clearAllLogs()" class="px-3 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs font-bold rounded-2xl transition-all border border-red-500/30">
+                        🗑️ ล้างประวัติ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Alerts (In Withdrawal Period) -->
+            <div id="logs-withdrawal-alerts" class="space-y-3">
+                <!-- Populated via JS if any herd is in withdrawal -->
+            </div>
+
+            <!-- Table of Logs -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+                    <div class="text-sm font-bold text-slate-800">รายการประวัติการรักษาล่าสุด (<span id="logs-count">0</span> รายการ)</div>
+                    <div class="text-xs text-slate-500">บันทึกลงหน่วยความจำเครื่องและระบบคลาวด์อัตโนมัติ</div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3.5">วันที่เริ่ม</th>
+                                <th class="p-3.5">คอก / โรงเรือน</th>
+                                <th class="p-3.5">จำนวน (ตัว)</th>
+                                <th class="p-3.5">นน.เฉลี่ย</th>
+                                <th class="p-3.5">ตัวยา / สารเสริม</th>
+                                <th class="p-3.5">วิธีให้ยา</th>
+                                <th class="p-3.5">ปริมาณ/วัน</th>
+                                <th class="p-3.5">ระยะหยุดยา</th>
+                                <th class="p-3.5">วันปลอดภัย (พ้นหยุดยา)</th>
+                                <th class="p-3.5 text-center">สถานะ</th>
+                                <th class="p-3.5 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table-body" class="divide-y divide-slate-100 text-slate-700">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 5. CENTRAL ADMIN CMS PANEL ================= -->
+        <section id="page-admin" class="hidden space-y-6 animate-fade-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-slate-900 via-teal-950 to-emerald-950 rounded-3xl p-6 text-white shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-emerald-500/30">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 border border-emerald-400/30 rounded-full text-[11px] font-semibold text-emerald-300 mb-2">
+                        👑 Central Knowledge & Master Data Management
+                    </div>
+                    <h1 class="text-2xl font-bold flex items-center gap-2">⚙️ จัดการฐานข้อมูลส่วนกลาง</h1>
+                    <p class="text-slate-300 text-xs mt-1">แก้ไข ปรับปรุง และเพิ่มข้อมูลยา สารเสริม </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="resetDefaultCentralDB()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold rounded-2xl transition-all border border-slate-700 flex items-center gap-1.5">
+                        🔄 <span>คืนค่าเริ่มต้น</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Sub-tabs -->
+            <div class="flex bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 max-w-md">
+                <button onclick="switchAdminTab('diseases')" id="admin-subtab-diseases" class="flex-1 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white shadow-sm transition-all flex items-center justify-center gap-1.5">
+                    🩺 <span>ฐานข้อมูลโรค & เกณฑ์ประเมิน</span>
+                </button>
+                <button onclick="switchAdminTab('drugs')" id="admin-subtab-drugs" class="flex-1 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5">
+                    💊 <span>ฐานข้อมูลยา & สารเสริม</span>
+                </button>
+            </div>
+
+            <!-- Admin Tab 1: Disease Management -->
+            <div id="admin-content-diseases" class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-slate-200/80">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">รายการโรคและเกณฑ์การประเมินอาการ (<span id="admin-diseases-count">0</span> โรค)</h3>
+                        <p class="text-[11px] text-slate-500">สามารถเพิ่มโรคใหม่ หรือแก้ไขคีย์เวิร์ดอาการและยาที่แนะนำได้ตลอดเวลา</p>
+                    </div>
+                    <button onclick="openAddDiseaseModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl shadow transition-all flex items-center gap-1.5">
+                        ➕ <span>เพิ่มโรค/กลุ่มอาการใหม่</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="admin-disease-cards-container">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Admin Tab 2: Drug Management -->
+            <div id="admin-content-drugs" class="hidden space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-slate-200/80">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">รายการยาและสารเสริมในระบบกลาง (<span id="admin-drugs-count">0</span> รายการ)</h3>
+                        <p class="text-[11px] text-slate-500">รองรับทั้งยาฉีด ยาละลายน้ำ ยาผสมอาหาร และสารเสริมสุขภาพสุกร</p>
+                    </div>
+                    <button onclick="openAddDrugModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl shadow transition-all flex items-center gap-1.5">
+                        ➕ <span>เพิ่มยา / สารเสริมใหม่</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3.5">ชื่อการค้า</th>
+                                    <th class="p-3.5">ตัวยาสำคัญ</th>
+                                    <th class="p-3.5">หมวดหมู่</th>
+                                    <th class="p-3.5">รูปแบบ / Route</th>
+                                    <th class="p-3.5">ขนาดยามาตรฐาน</th>
+                                    <th class="p-3.5">ระยะหยุดยา</th>
+                                    <th class="p-3.5 text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-drugs-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= MODALS & POPUPS ================= -->
+
+    <!-- 1. DISEASE EDIT/ADD MODAL -->
+    <div id="modal-disease" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800" id="modal-disease-title">เพิ่ม/แก้ไขข้อมูลโรค</h3>
+                <button onclick="closeModal('modal-disease')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold">✕</button>
+            </div>
+
+            <form id="form-disease-editor" onsubmit="saveDiseaseFromModal(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="edit-disease-id">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ชื่อโรค (ภาษาไทย) *</label>
+                        <input type="text" id="edit-disease-name" required placeholder="เช่น ปอดบวมเฉียบพลัน (APP)" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ชื่อสากล / เชื้อก่อโรค (English) *</label>
+                        <input type="text" id="edit-disease-scientific" required placeholder="Actinobacillus pleuropneumoniae" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ระยะสุกรที่พบบ่อย *</label>
+                        <select id="edit-disease-stage" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                            <option value="all">ทุกระยะการเลี้ยง</option>
+                            <option value="suckling">ลูกสุกรดูดนม</option>
+                            <option value="nursery">สุกรอนุบาล</option>
+                            <option value="grower">สุกรรุ่น - ขุน</option>
+                            <option value="sow">แม่พันธุ์ / พ่อพันธุ์</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ระดับความรุนแรง *</label>
+                        <select id="edit-disease-severity" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                            <option value="high">🔴 รุนแรงมาก / เฉียบพลัน / ตายสูง</option>
+                            <option value="medium">🟡 ปานกลาง / เรื้อรัง</option>
+                            <option value="low">🟢 เฝ้าระวัง / อาการไม่รุนแรง</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">อาการสำคัญที่ตรวจพบ (คีย์เวิร์ดสำหรับประเมิน แยกด้วยเครื่องหมายจุลภาค ,) *</label>
+                    <textarea id="edit-disease-symptoms" required rows="2" placeholder="ไอแห้ง, หอบกระเพื่อม, ฟองเลือดออกจมูก, ตายเฉียบพลัน, ไข้สูง" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500"></textarea>
+                    <p class="text-[10px] text-slate-400 mt-0.5">ระบบจะนำคีย์เวิร์ดเหล่านี้ไปจับคู่กับการติ๊กเลือกอาการของเกษตรกร</p>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">รหัสยา/สารเสริมที่แนะนำ (เลือกตัวยาหลัก) *</label>
+                    <div id="edit-disease-drugs-checklist" class="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-200 custom-scrollbar">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">คำแนะนำการจัดการและรักษาเสริม (Supportive Care) *</label>
+                    <textarea id="edit-disease-management" required rows="2" placeholder="แยกสุกรป่วยเข้าคอกพยาบาล, เสริมอิเล็กโทรไลต์ในน้ำ, ตรวจสอบการระบายอากาศ" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modal-disease')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow">💾 บันทึกข้อมูลโรค</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. DRUG EDIT/ADD MODAL -->
+    <div id="modal-drug" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800" id="modal-drug-title">เพิ่ม/แก้ไขรายการยา & สารเสริม</h3>
+                <button onclick="closeModal('modal-drug')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold">✕</button>
+            </div>
+
+            <form id="form-drug-editor" onsubmit="saveDrugFromModal(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="edit-drug-id">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ชื่อการค้า (Trade Name) *</label>
+                        <input type="text" id="edit-drug-trade" required placeholder="เช่น ด็อกซี่ 50% พรีมิกซ์" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ตัวยาสำคัญ & ความแรง (Generic Name) *</label>
+                        <input type="text" id="edit-drug-generic" required placeholder="Doxycycline Hyclate 500 mg/g" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">หมวดหมู่ *</label>
+                        <select id="edit-drug-category" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                            <option value="antibiotic_inject">💉 ยาปฏิชีวนะชนิดฉีด</option>
+                            <option value="water_soluble">💧 ยาปฏิชีวนะละลายน้ำ</option>
+                            <option value="feed_premix">🌾 ยาผสมอาหาร (Premix)</option>
+                            <option value="nsaid">🩹 ยาลดไข้-แก้ปวด-ลดอักเสบ</option>
+                            <option value="supplement">🧪 สารเสริม / วิตามิน / กรดอินทรีย์</option>
+                            <option value="antiparasitic">🪱 ยาถ่ายพยาธิ / กำจัดไร</option>
+                            <option value="hormone">🧬 ฮอร์โมนเร่งคลอด/ขับน้ำคาวปลา</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">รูปแบบการให้ยาหลัก *</label>
+                        <select id="edit-drug-route" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                            <option value="inject">ฉีดรายตัว</option>
+                            <option value="water">ละลายน้ำกิน</option>
+                            <option value="feed">ผสมอาหาร</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ระยะหยุดยา (วัน) *</label>
+                        <input type="number" id="edit-drug-withdrawal" required min="0" value="7" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ขนาดยาฉีด (ml ต่อน้ำหนัก 10 กก.)</label>
+                        <input type="number" id="edit-drug-dose-inject" step="0.1" value="1.0" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white">
+                        <span class="text-[10px] text-slate-400">ตัวอย่าง: 1 ml / 10 kg</span>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ขนาดผสมน้ำ / อาหาร (กรัม หรือ มล. ต่อน้ำ 1 ลิตร / อาหาร 1 ตัน)</label>
+                        <input type="number" id="edit-drug-dose-oral" step="0.1" value="1.0" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white">
+                        <span class="text-[10px] text-slate-400">ละลายน้ำ: g/L, ผสมอาหาร: kg/ตัน</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">สรรพคุณ / ข้อบ่งใช้ *</label>
+                    <input type="text" id="edit-drug-indication" required placeholder="รักษาโรคติดเชื้อทางเดินหายใจ ปอดบวม ข้ออักเสบ" class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">คำแนะนำวิธีใช้ & ข้อควรระวัง *</label>
+                    <textarea id="edit-drug-directions" required rows="2" placeholder="ละลายน้ำให้สุกรกินต่อเนื่อง 3-5 วัน ควรเปลี่ยนน้ำผสมยาทุกวัน" class="w-full px-3 py-2 rounded-xl border border-slate-200"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ลิงก์รูปภาพบรรจุภัณฑ์ (Image URL หรือปล่อยว่างเพื่อใช้ไอคอน)</label>
+                    <input type="text" id="edit-drug-image" placeholder="https://..." class="w-full px-3 py-2 rounded-xl border border-slate-200">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modal-drug')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-600">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow">💾 บันทึกข้อมูลยา</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. FARM SETTINGS MODAL -->
+    <div id="modal-farm-settings" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-800">🏡 ข้อมูลฟาร์มและผู้ดูแล</h3>
+                <button onclick="closeModal('modal-farm-settings')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold">✕</button>
+            </div>
+            <form onsubmit="saveFarmSettings(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ชื่อฟาร์มสุกร</label>
+                    <input type="text" id="setting-farm-name" required value="สว่างฟาร์มสุกรมาตรฐาน GAP" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">ชื่อผู้จัดการฟาร์ม / สัตวบาล</label>
+                    <input type="text" id="setting-manager-name" required value="คุณสมศักดิ์ นิลเจริญ" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">จังหวัด</label>
+                        <input type="text" id="setting-province" required value="ราชบุรี" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">จำนวนสุกรทั้งหมด (ตัว)</label>
+                        <input type="number" id="setting-total-heads" required value="1200" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('modal-farm-settings')" class="px-4 py-2 rounded-xl bg-slate-100 font-bold text-slate-600">ปิด</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 font-bold text-white shadow">💾 บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<!-- ================= JAVASCRIPT CORE APPLICATION ================= -->
+<script>
+        const DEFAULT_MASTER_DRUGS = [
+            // 1. Injectable Antibiotics
+            {
+                id: 'amox_15_la',
+                tradeName: 'แอมม็อกซี่ 15% LA (Amoxy LA)',
+                genericName: 'Amoxicillin Trihydrate 150 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 1.0,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 14,
+                indication: 'ข้ออักเสบ (Strep. suis), ปอดบวม, ทางเดินปัสสาวะและมดลูกอักเสบ (MMA)',
+                directions: 'ฉีดเข้ากล้ามเนื้อลึก (IM) บริเวณหลังใบหู 1 ml ต่อน้ำหนักตัว 10 กก. ออกฤทธิ์ยาว 48 ชม. หากจำเป็นฉีดซ้ำได้ใน 48 ชม.',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'florfenicol_300',
+                tradeName: 'ฟลอร์ฟินิคอล 30% (Florfenicol Injectable)',
+                genericName: 'Florfenicol 300 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.67,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 18,
+                indication: 'ปอดบวมเฉียบพลัน APP, ไข้หวัดหมู, สุกรหายใจหอบท้องกระเพื่อม',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ml ต่อน้ำหนักตัว 15 กก. วันละครั้ง ติดต่อกัน 2 วัน หรือฉีดเข้าใต้ผิวหนัง (SC) ขนานเดียว',
+                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'tulathromycin_100',
+                tradeName: 'ทูลาโทรมัยซิน 10% (Draxxin / Tulissin)',
+                genericName: 'Tulathromycin 100 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.25,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 13,
+                indication: 'ปอดบวมรุนแรง Mycoplasma, APP, Bordetella ฉีดเพียงเข็มเดียวคุมได้ 10-14 วัน',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) หลังใบหูเพียงครั้งเดียว ขนาด 1 ml ต่อน้ำหนักตัว 40 กก. (0.25 ml / 10 kg)',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'excede_ceftiofur',
+                tradeName: 'เอ็กซีด (Excede)',
+                genericName: 'Ceftiofur crystalline free acid 100 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 20,
+                indication: 'ใช้รักษาโรคในระบบทางเดินหายใจที่เกิดจากเชื้อ APP, Pasteurellosis, Glasser\'s disease และ Streptococcosis',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) ครั้งเดียว ขนาด 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. (0.5 ml/10 kg) ออกฤทธิ์ยาวนาน 7 วัน',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'enrofloxacin_10',
+                tradeName: 'เอนโรฟลอกซาซิน 10% (Enro 100)',
+                genericName: 'Enrofloxacin 100 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 10,
+                indication: 'ลูกสุกรท้องเสียรุนแรงขี้ขาว/เหลือง E. coli, ทางเดินอาหารอักเสบเฉียบพลัน',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ml ต่อน้ำหนักตัว 20 กก. (0.5 ml/10 kg) วันละ 1 ครั้ง ต่อเนื่อง 3 วัน',
+                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'bezter_kana_250',
+                tradeName: 'เบซเตอร์ กานา 250 (Bezter Kana 250)',
+                genericName: 'Kanamycin 250 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 10,
+                indication: 'ใช้รักษาอาการท้องเสีย ระบบทางเดินอาหารอักเสบ',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. วันละครั้ง ติดต่อกัน 3-5 วัน ระวังพิษต่อไต (Nephrotoxic)',
+                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'bezter_lincospec_150',
+                tradeName: 'เบซเตอร์ ลินโคสเปค 150 (Bezter Lincospec 150)',
+                genericName: 'Lincomycin + Spectinomycin 150 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.67,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 10,
+                indication: 'ไอ ท้องเสีย ควบคุมเชื้อระบบทางเดินหายใจและทางเดินอาหารร่วมกัน',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 15 กก. หลีกเลี่ยงการใช้งานติดต่อกันเป็นเวลานาน',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'dynamutilin_20_inj',
+                tradeName: 'ไดนามูทิลิน 20% (Dynamutilin 20%)',
+                genericName: 'Tiamulin 200 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 14,
+                indication: 'โรคปอดบวม-ข้อบวม จากเชื้อมัยโคพลาสมา โรคบิดมูกเลือด (Swine Dysentery)',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. ฉีดวันละครั้ง ติดต่อกัน 3-5 วัน (กรณีบิดมูกเลือดฉีด 1 ครั้ง) *ห้ามใช้ร่วมกับกลุ่ม Ionophores*',
+                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'genta_50_inj',
+                tradeName: 'เจนต้า 50 (Genta 50 / NAOGEN-100)',
+                genericName: 'Gentamicin 50-100 mg/ml',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.4,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 45,
+                indication: 'ใช้ควบคุม/รักษาโรคติดเชื้อระบบทางเดินหายใจ และทางเดินอาหารจากเชื้อ E.coli, Salmonella',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 25 กก. วันละ 2 ครั้ง หรือ 1 ซี.ซี. / 10 กก. วันละครั้ง ติดต่อกัน 3-5 วัน',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'pendistrep_la',
+                tradeName: 'เพนไดสเตรป แอล.เอ. (Pendistrep L.A.)',
+                genericName: 'Procaine + Benzathine Benzylpenicillin + Dihydrostreptomycin',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.35,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 21,
+                indication: 'ใช้รักษาโรคติดเชื้อระบบทางเดินหายใจ ปอดบวม หนอง ฝี ผิวหนังอักเสบ ขาเจ็บ ข้อบวม ป้องกันการติดเชื้อหลังผ่าตัด',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20-40 กก. ฉีดวันเว้น 2 วัน ติดต่อกัน 3 เข็ม ระวังการแพ้ยา',
+                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'synulox_rtu',
+                tradeName: 'ไซนูลอกซ์ อาร์ทียู (Synulox RTU)',
+                genericName: 'Amoxicillin + Clavulanic Acid',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 28,
+                indication: 'รักษาโรคปอดบวม ข้อบวม มดลูกอักเสบ ฝีหนอง แผลตามผิวหนัง ที่ดื้อยา Amox ทั่วไป',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. วันละครั้ง ติดต่อกัน 3-5 วัน และควรนวดบริเวณที่ฉีดหลังฉีดเสร็จ',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+            },
+
+            // 2. Water Soluble Medications & Oral Liquids
+            {
+                id: 'tiamulin_45_ws',
+                tradeName: 'ไทอะมูลิ่น 45% ละลายน้ำ (Tiamulin 45% WS / Vetmulin)',
+                genericName: 'Tiamulin Hydrogen Fumarate 450 mg/g',
+                category: 'water_soluble',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0.2,
+                doseFeedPerTon: 0.25,
+                withdrawalDays: 5,
+                indication: 'บิดมูกเลือดในสุกร (Swine Dysentery), โรคลำไส้หนา (Ileitis), ไมโคพลาสมาปอดบวม',
+                directions: 'ละลายน้ำดื่มในอัตรา 1 กรัม ต่อน้ำ 5 ลิตร (0.2 g/L) ให้กินติดต่อกัน 5 วัน *ห้ามใช้ร่วมกับ Monensin หรือ Salinomycin*',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'pulmotil_ac',
+                tradeName: 'พูลโมทิล เอซี (Pulmotil AC / Tilmi 25%)',
+                genericName: 'Tilmicosin Phosphate 250 mg/ml',
+                category: 'water_soluble',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0.8,
+                doseFeedPerTon: 0,
+                withdrawalDays: 20,
+                indication: 'ควบคุมและรักษาโรคทางเดินหายใจสุกร PRDC, ปอดบวม Actinobacillus pleuropneumoniae (APP)',
+                directions: 'ผสมน้ำดื่มในอัตรา 0.8 ml ต่อน้ำ 1 ลิตร (หรือ 80 ซี.ซี. ต่อน้ำ 100 ลิตร) ให้กินติดต่อกัน 5 วัน เป็นพิษรุนแรงหากนำไปฉีด',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'valosin_soluble',
+                tradeName: 'วาโลซิน โซลูเบิล (Valosin Soluble)',
+                genericName: 'Tylvalosin 625 mg/g',
+                category: 'water_soluble',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0.026,
+                doseFeedPerTon: 0,
+                withdrawalDays: 5,
+                indication: 'ใช้รักษากลุ่มเชื้อแบคทีเรียระบบทางเดินหายใจ แบคทีเรียในลำไส้ที่เกิดจากเชื้อ Mycoplasma และ Lawsonia (โรคท้องเสียเนื้อตาย)',
+                directions: 'ละลายน้ำกินในอัตรา 40 กรัม ต่อน้ำ 1.5 ลิตร ให้กินติดต่อกัน 5 วันต่อเนื่อง',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'doxcine_500_wsp',
+                tradeName: 'ด็อกซีน 500 ดับเบิลยูเอสพี (Doxcine 500 W.S.P.)',
+                genericName: 'Doxycycline Hyclate 500 mg/g',
+                category: 'water_soluble',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0.2,
+                doseFeedPerTon: 0,
+                withdrawalDays: 8,
+                indication: 'ใช้รักษาโรคติดเชื้อแบคทีเรียในระบบทางเดินหายใจ และทางเดินอาหารของสุกรอนุบาลและสุกรขุน',
+                directions: 'ผสมกับน้ำกินหรืออาหารในขนาด 1 กรัม ต่อน้ำหนักตัวสัตว์ 50 กก. ต่อวัน ติดต่อกัน 3-5 วัน ระวังโอเวอร์โดส',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'vetrimoxin_50_oral',
+                tradeName: 'เวทริม็อกซิน 50 ผงละลายน้ำ (Amox 500 WS)',
+                genericName: 'Amoxicillin Trihydrate 500 mg/g',
+                category: 'water_soluble',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0.4,
+                doseFeedPerTon: 0.6,
+                withdrawalDays: 15,
+                indication: 'รักษาโรคติดเชื้อแบคทีเรีย ระบบทางเดินหายใจ ท้องเสีย และข้อบวมสเตรปโตคอคคัส',
+                directions: 'ละลายน้ำดื่มในอัตรา 1 กรัม ต่อน้ำหนักตัวสัตว์ 25 กก. ต่อวัน (หรือ 40 กรัม ต่อน้ำ 100 ลิตร) ให้กินต่อเนื่อง 3-5 วัน',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'dosto_emulsion',
+                tradeName: 'โดสโต อิมัลชัน (DOSTO Emulsion)',
+                genericName: 'Natural Oregano oil 8%',
+                category: 'water_soluble',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 2.0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 0,
+                indication: 'เพิ่มความน่ากินของอาหาร รักษาและป้องกันอาการท้องเสีย ขี้ไหลในลูกสุกร',
+                directions: 'ใช้ปั๊มปากลูกสุกรโดยตรง ขนาด 1-2 ml ต่อตัว ได้รับยกเว้นระยะหยุดยา ปลอดภัยสูง',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'toltrazuril_5_oral',
+                tradeName: 'โทลทราซูริล 5% (Toltrazuril 5% / Forceris)',
+                genericName: 'Toltrazuril 50 mg/ml (สูตร Forceris ผสมธาตุเหล็ก)',
+                category: 'water_soluble',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 25,
+                indication: 'ใช้สำหรับป้องกันและรักษาอาการของโรคบิดบวม ท้องเสียขี้เทาขี้เป็ดในสุกรอายุ 3-5 วัน',
+                directions: 'ปั๊มกรอกปากลูกสุกร ขนาด 0.4 ซี.ซี. ต่อ 1 กก. (20 mg/kg) หรือสูตรเข้ากล้ามหลังคลอด 24 ชม. 1.5 cc ต่อตัว เขย่าขวดทุกครั้งก่อนใช้',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+            },
+                // 3. Feed Premixes
+            {
+                id: 'doxy_50_premix',
+                tradeName: 'ด็อกซีไซคลิน 50% พรีมิกซ์ (Doxy 500 Premix)',
+                genericName: 'Doxycycline Hyclate 500 mg/g',
+                category: 'feed_premix',
+                route: 'feed',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0.25,
+                doseFeedPerTon: 0.5,
+                withdrawalDays: 7,
+                indication: 'ป้องกันและรักษาโรคทางเดินหายใจและหลอดลมอักเสบในสุกรอนุบาลและสุกรขุน',
+                directions: 'ผสมอาหารสัตว์ในอัตรา 500 กรัม ต่ออาหารสุกร 1 ตัน (0.5 kg/ton) ให้กินติดต่อกัน 7-14 วัน',
+                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'linco_specto_premix',
+                tradeName: 'ลินโค-สเปกโต พรีมิกซ์ (Linco-Spectin Premix)',
+                genericName: 'Lincomycin 22g + Spectinomycin 22g / kg',
+                category: 'feed_premix',
+                route: 'feed',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 1.0,
+                withdrawalDays: 3,
+                indication: 'ควบคุมโรคลำไส้อักเสบ บิดสุกร และปอดบวมไมโคพลาสมาในสุกรหลังหย่านม',
+                directions: 'ผสมอาหารสัตว์ในอัตรา 1-2 กก. ต่ออาหาร 1 ตัน ให้กินต่อเนื่อง 21 วันในช่วงย้ายคอก',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+},
+// 4. NSAIDs & Antipyretics (ยาลดไข้ ลดอักเสบ)
+{
+                id: 'flunixin_50',
+                tradeName: 'ฟลูนิกซิน เมกลูมีน 5% (Flunixin Meglumine)',
+                genericName: 'Flunixin Meglumine 50 mg/ml',
+                category: 'nsaid',
+                route: 'inject',
+                doseInjectPer10kg: 0.44,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 7,
+                indication: 'ลดไข้สูงเฉียบพลัน ลดปวด ลดการอักเสบในปอดบวม ข้ออักเสบ และเต้านมอักเสบ (MMA)',
+                directions: 'ฉีดเข้ากล้ามเนื้อลึก (IM) 1 ml ต่อน้ำหนักตัว 22 กก. วันละ 1 ครั้ง ติดต่อกันไม่เกิน 3-5 วัน',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+},
+{
+                id: 'bezter_analgin_500',
+                tradeName: 'เบซเตอร์ อนาลจิน 500 (Bezter Analgin)',
+                genericName: 'Metamizole (Dipyrone) 500 mg/ml',
+                category: 'nsaid',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 0,
+                indication: 'ยาลดไข้เร่งด่วน บรรเทาปวดจากการเจ็บป่วย เจ็บกีบ เจ็บข้อ คลายกล้ามเนื้อเรียบ',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 10-20 กก. ฉีดห่างจากเข็มแรก 8 ชม. ติดต่อกัน 3-5 เข็ม',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+},
+{
+                id: 'ketoprofen_10',
+                tradeName: 'คีโตโปรเฟน 10% (Kelaprofen / Ketoprig)',
+                genericName: 'Ketoprofen 100 mg/ml',
+                category: 'nsaid',
+                route: 'inject',
+                doseInjectPer10kg: 0.3,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 4,
+                indication: 'ลดไข้ ลดอาการอักเสบ ลดปวดรุนแรงในระบบทางเดินหายใจ หรือกลุ่มอาการกีบเจ็บขาเจ็บ',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 33 กก. วันละครั้ง ติดต่อกัน 3-5 วัน หรือแบบละลายน้ำกิน (Ketoprig) 1 cc / 33 kg ติดต่อกันไม่เกิน 2 วัน ระวังแผลในกระเพาะอาหาร',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+                },
+{
+                id: 'pacetam_20_oral',
+                tradeName: 'พราซีเตม 20% (Pacetam 20%)',
+                genericName: 'Paracetamol 200 mg/ml',
+                category: 'nsaid',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 1.5,
+                doseFeedPerTon: 0,
+                withdrawalDays: 3,
+                indication: 'ยาลดไข้แบบละลายน้ำกลุ่มประชากร ใช้รักษาอาการไข้ที่มีสาเหตุจากโรคติดเชื้อทางเดินหายใจยกเล้า',
+                directions: 'ละลายน้ำให้สุกรกินในอัตรา 1.5 ซี.ซี. ต่อน้ำหนักตัว 10 กก. ติดต่อกัน 5 วัน อาจพบอุจจาระเหลวและหากใช้นานเกินไปเป็นพิษต่อไต',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+},
+// 5. Vitamins, Electrolytes & Supplements (กลุ่มอาหารเสริม)
+{
+                id: 'vitamin_ad3e_inj',
+                tradeName: 'วิตามิน เอดีสามอี ชนิดฉีด (VITAMIN AD3E / ADEK126)',
+                genericName: 'Vitamin A, D3, E Injection',
+                category: 'supplement',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 0,
+                indication: 'บำรุงระบบสืบพันธุ์ พ่อ-แม่พันธุ์สุกร เสริมภูมิต้านทานสุกรเล็กหลังหย่านม ลดความเครียด',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) ตามคำแนะนำข้างขวด บำรุงร่างกาย ไม่ต้องหยุดยาก่อนส่งตลาด',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+},
+{
+                id: 'biolyte_vit_c',
+                tradeName: 'ไบโอไลท์ / วิต ซี 300 / ADEK M',
+                genericName: 'Vitamin C + Electrolyte Powder',
+                category: 'supplement',
+                route: 'water',
+                doseInjectPer10kg: 0,
+                doseWaterPerL: 1.0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 0,
+                indication: 'ชดเชยการสูญเสียน้ำ ลดความเครียดจากอากาศร้อน (Heat Stress) ป้องกันเม็ดเลือดแตก เพิ่มความแข็งแรงให้สุกร',
+                directions: 'ผสมละลายน้ำให้กินอิสระ (เช่น ADEK M ใช้ 1-2 กรัม ต่อน้ำ 1 ลิตร) ตลอดช่วงที่อากาศร้อนจัดหรือย้ายคอก',
+                image: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&auto=format&fit=crop&q=60'
+}
+];
+        const DEFAULT_MASTER_DISEASES = [
+            {
+                id: 'dis_app',
+                name: 'เยื่อหุ้มปอดอักเสบ (APP)',
+                scientific: 'Actinobacillus pleuropneumoniae',
+                stage: 'grower',
+                severity: 'high',
+                symptomsList: ['หายใจหอบลึก ซี่โครงกระเพื่อม', 'มีฟองเลือดปนหนองไหลออกจมูก/ปาก ตายเฉียบพลัน', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน', 'ไอแห้งๆ เรื้อรังช่วงเช้าหรือตอนไล่ฝูง', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'pump_breathing, bloody_nose, high_fever, cough_dry, off_feed',
+                recommendedDrugIds: ['florfenicol_300', 'tulathromycin_100', 'flunixin_50', 'tilmicosin_25_sol'],
+                management: 'แยกสุกรป่วยทันที ฉีดรักษาเป็นรายตัวด้วย Florfenicol หรือ Tulathromycin ร่วมกับยาลดไข้ Flunixin พร้อมผสมน้ำฝูงด้วย Tilmicosin 5 วัน'
+            },
+            {
+                id: 'dis_prdc',
+                name: 'กลุ่มอาการโรคทางเดินหายใจสุกรเรื้อรัง (PRDC / Mycoplasma)',
+                scientific: 'Mycoplasma hyopneumoniae & Complex',
+                stage: 'nursery',
+                severity: 'medium',
+                symptomsList: ['ไอแห้งๆ เรื้อรังช่วงเช้าหรือตอนไล่ฝูง', 'หายใจหอบลึก ซี่โครงกระเพื่อม', 'แคระแกร็น โตช้า ขนหยาบ', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'cough_dry, pump_breathing, stunt_growth, off_feed',
+                recommendedDrugIds: ['doxy_50_premix', 'tilmicosin_25_sol', 'tulathromycin_100', 'catosal_b12'],
+                management: 'ผสมยา Doxycycline หรือ Tilmicosin ในอาหาร/น้ำดื่มต่อเนื่อง 7-14 วัน ปรับปรุงการระบายอากาศและลดแอมโมเนียในโรงเรือน'
+            },
+            {
+                id: 'dis_ecoli_piglet',
+                name: 'ลูกสุกรท้องเสียจากเชื้อโคไล (Colibacillosis / E. coli)',
+                scientific: 'Enterotoxigenic Escherichia coli (ETEC)',
+                stage: 'suckling',
+                severity: 'high',
+                symptomsList: ['ขี้เหลวสีเหลือง/ขาว เป็นน้ำ ก้นเปียก ขาดน้ำ', 'อาเจียน ปฏิเสธอาหาร ผอมแห้งเร็ว', 'ลูกสุกรตัวซีดขาว ขนหยาบ แคระแกร็น เหนื่อยง่าย'],
+                symptomsKeywords: 'diarrhea_yellow, vomiting, piglet_pale, dehydration',
+                recommendedDrugIds: ['enrofloxacin_10', 'organic_acid_liquid', 'probiotic_electrolyte_ws', 'amox_50_ws'],
+                management: 'ป้อนหรือฉีด Enrofloxacin ร่วมกับให้สารละลายอิเล็กโทรไลต์ผสมน้ำอุ่นกกไฟ กกไฟรักษาความอบอุ่นให้ลูกสุกร 32-34°C'
+            },
+            {
+                id: 'dis_dysentery',
+                name: 'บิดมูกเลือดและโรคลำไส้หนา (Swine Dysentery & Ileitis)',
+                scientific: 'Brachyspira hyodysenteriae / Lawsonia intracellularis',
+                stage: 'grower',
+                severity: 'high',
+                symptomsList: ['ถ่ายเป็นมูกเลือด ขี้สีดำคล้ายซีอิ๊วหรือมีลิ่มเลือด', 'ขี้เหลวสีเหลือง/ขาว เป็นน้ำ ก้นเปียก ขาดน้ำ', 'ปฏิเสธอาหาร ผอมแห้งเร็ว', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน'],
+                symptomsKeywords: 'diarrhea_blood, diarrhea_yellow, off_feed, high_fever',
+                recommendedDrugIds: ['tiamulin_45_ws', 'linco_specto_premix', 'probiotic_electrolyte_ws'],
+                management: 'ละลายยา Tiamulin 45% ในน้ำดื่มทันที 5 วัน หรือผสมอาหารด้วย Linco-Spectin ต่อเนื่อง 14 วัน ทำความสะอาดพื้นคอกและพ่นฆ่าเชื้อ'
+            },
+            {
+                id: 'dis_strep_suis',
+                name: 'โรคข้อบวมและเยื่อหุ้มสมองอักเสบ (Streptococcus suis)',
+                scientific: 'Streptococcus suis Infection',
+                stage: 'nursery',
+                severity: 'high',
+                symptomsList: ['ข้อเข่า/ข้อเท้าบวมโต เจ็บขา เดินกะเผลก ลุกไม่ขึ้น', 'นอนตะแคงขาพายน้ำ ชักเกร็ง คอเอียง ตาโปน', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน'],
+                symptomsKeywords: 'joint_swelling, neuro_seizure, high_fever',
+                recommendedDrugIds: ['amox_15_la', 'ketoprofen_10', 'amox_50_ws', 'flunixin_50'],
+                management: 'ฉีด Amoxy LA ร่วมกับ Ketoprofen ทันทีในตัวที่ชัก/ข้อบวม และผสม Amoxy WS ละลายน้ำให้ทั้งฝูงกินป้องกัน 5 วัน'
+            },
+            {
+                id: 'dis_mange_skin',
+                name: 'ขี้เรื้อนสุกรและผิวหนังอักเสบสะเก็ดมัน (Mange & Greasy Pig)',
+                scientific: 'Sarcoptes scabiei / Staphylococcus hyicus',
+                stage: 'all',
+                severity: 'medium',
+                symptomsList: ['ผิวหนังมันเยิ้ม มีสะเก็ดสีน้ำตาลดำทั่วตัว คันสะบัดหู', 'แคระแกร็น โตช้า ขนหยาบ', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'skin_crust, stunt_growth, off_feed',
+                recommendedDrugIds: ['ivermectin_1', 'amox_15_la', 'catosal_b12'],
+                management: 'ฉีด Ivermectin เข้าใต้ผิวหนัง (SC) ซ้ำอีกครั้งใน 14 วัน และฉีด Amoxy LA ในตัวที่มีผิวหนังติดเชื้อแบคทีเรียแทรกซ้อน'
+            },
+            {
+                id: 'dis_sow_mma',
+                name: 'กลุ่มอาการเต้านมอักเสบ มดลูกอักเสบ นมแห้งหลังคลอด (Sow MMA Syndrome)',
+                scientific: 'Mastitis-Metritis-Agalactia Complex',
+                stage: 'sow',
+                severity: 'high',
+                symptomsList: ['เต้านมแม่สุกรบวมแดงแข็ง นมแห้ง มีหนองไหลจากช่องคลอดหลังคลอด', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'sow_mastitis, high_fever, off_feed',
+                recommendedDrugIds: ['amox_15_la', 'flunixin_50', 'oxytocin_10', 'catosal_b12'],
+                management: 'ฉีด Amoxy LA ร่วมกับ Flunixin Meglumine เพื่อลดไข้และลดบวมเต้านม และฉีด Oxytocin ช่วยขับน้ำคาวปลาและกระตุ้นการหลั่งน้ำนม'
+            },
+            {
+                id: 'dis_iron_deficiency',
+                name: 'ภาวะโลหิตจางและแคระแกร็นในลูกสุกรดูดนม (Piglet Anemia)',
+                scientific: 'Iron Deficiency Anemia',
+                stage: 'suckling',
+                severity: 'medium',
+                symptomsList: ['ลูกสุกรตัวซีดขาว ขนหยาบ แคระแกร็น เหนื่อยง่าย', 'ขี้เหลวสีเหลือง/ขาว เป็นน้ำ ก้นเปียก ขาดน้ำ'],
+                symptomsKeywords: 'piglet_pale, diarrhea_yellow',
+                recommendedDrugIds: ['iron_dextran_b12', 'catosal_b12'],
+                management: 'ฉีด Iron Dextran + B12 ตัวละ 1.5-2 ml เข้ากล้ามเนื้อหลังใบหูเมื่อลูกสุกรอายุ 2-3 วัน และฉีดซ้ำที่อายุ 10 วันหากซีดมาก'
+            },
+            {
+                id: 'dis_app',
+                name: 'ปอดบวมเฉียบพลันและเยื่อหุ้มปอดอักเสบ (APP)',
+                scientific: 'Actinobacillus pleuropneumoniae',
+                stage: 'grower',
+                severity: 'high',
+                symptomsList: ['หายใจหอบลึก ซี่โครงกระเพื่อม', 'มีฟองเลือดปนหนองไหลออกจมูก/ปาก ตายเฉียบพลัน', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน', 'ไอแห้งๆ เรื้อรังช่วงเช้าหรือตอนไล่ฝูง', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'pump_breathing, bloody_nose, high_fever, cough_dry, off_feed',
+                recommendedDrugIds: ['florfenicol_300', 'tulathromycin_100', 'flunixin_50', 'pulmotil_ac'],
+                management: 'แยกสุกรป่วยทันที ฉีดรักษาเป็นรายตัวด้วย Florfenicol หรือ Tulathromycin ร่วมกับยาลดไข้ Flunixin พร้อมผสมน้ำฝูงด้วย Tilmicosin 5 วัน'
+            },
+            {
+                id: 'dis_prdc',
+                name: 'กลุ่มอาการโรคทางเดินหายใจสุกรเรื้อรัง (PRDC / Mycoplasma)',
+                scientific: 'Mycoplasma hyopneumoniae & Complex',
+                stage: 'nursery',
+                severity: 'medium',
+                symptomsList: ['ไอแห้งๆ เรื้อรังช่วงเช้าหรือตอนไล่ฝูง', 'หายใจหอบลึก ซี่โครงกระเพื่อม', 'แคระแกร็น โตช้า ขนหยาบ', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'cough_dry, pump_breathing, stunt_growth, off_feed',
+                recommendedDrugIds: ['doxy_50_premix', 'pulmotil_ac', 'tulathromycin_100', 'vitamin_ad3e_inj'],
+                management: 'ผสมยา Doxycycline หรือ Tilmicosin ในอาหาร/น้ำดื่มต่อเนื่อง 7-14 วัน ปรับปรุงการระบายอากาศและลดแอมโมเนียในโรงเรือน'
+            },
+            {
+                id: 'dis_ecoli_piglet',
+                name: 'ลูกสุกรท้องเสียจากเชื้อโคไล (Colibacillosis / E. coli)',
+                scientific: 'Enterotoxigenic Escherichia coli (ETEC)',
+                stage: 'suckling',
+                severity: 'high',
+                symptomsList: ['ขี้เหลวสีเหลือง/ขาว เป็นน้ำ ก้นเปียก ขาดน้ำ', 'อาเจียน ปฏิเสธอาหาร ผอมแห้งเร็ว', 'ลูกสุกรตัวซีดขาว ขนหยาบ แคระแกร็น เหนื่อยง่าย'],
+                symptomsKeywords: 'diarrhea_yellow, vomiting, piglet_pale, dehydration',
+                recommendedDrugIds: ['enrofloxacin_10', 'dosto_emulsion', 'biolyte_vit_c', 'vetrimoxin_50_oral'],
+                management: 'ป้อนยา Dosto Emulsion หรือฉีด Enrofloxacin ร่วมกับให้สารละลายอิเล็กโทรไลต์ผสมน้ำอุ่น รักษาความอบอุ่นในคอกกกที่ 32-34°C'
+            },
+            {
+                id: 'dis_dysentery',
+                name: 'บิดมูกเลือดและโรคลำไส้หนา (Swine Dysentery & Ileitis)',
+                scientific: 'Brachyspira hyodysenteriae / Lawsonia intracellularis',
+                stage: 'grower',
+                severity: 'high',
+                symptomsList: ['ถ่ายเป็นมูกเลือด ขี้สีดำคล้ายซีอิ๊วหรือมีลิ่มเลือด', 'ขี้เหลวสีเหลือง/ขาว เป็นน้ำ ก้นเปียก ขาดน้ำ', 'ปฏิเสธอาหาร ผอมแห้งเร็ว', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน'],
+                symptomsKeywords: 'diarrhea_blood, diarrhea_yellow, off_feed, high_fever',
+                recommendedDrugIds: ['tiamulin_45_ws', 'linco_specto_premix', 'biolyte_vit_c'],
+                management: 'ละลายยา Tiamulin 45% ในน้ำดื่มทันที 5 วัน หรือผสมอาหารด้วย Linco-Spectin ต่อเนื่อง 14 วัน ทำความสะอาดพื้นคอกและพ่นฆ่าเชื้อ'
+            },
+            {
+                id: 'dis_strep_suis',
+                name: 'โรคข้อบวมและเยื่อหุ้มสมองอักเสบ (Streptococcus suis)',
+                scientific: 'Streptococcus suis Infection',
+                stage: 'nursery',
+                severity: 'high',
+                symptomsList: ['ข้อเข่า/ข้อเท้าบวมโต เจ็บขา เดินกะเผลก ลุกไม่ขึ้น', 'นอนตะแคงขาพายน้ำ ชักเกร็ง คอเอียง ตาโปน', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน'],
+                symptomsKeywords: 'joint_swelling, neuro_seizure, high_fever',
+                recommendedDrugIds: ['amox_15_la', 'ketoprofen_10', 'vetrimoxin_50_oral', 'flunixin_50'],
+                management: 'ฉีด Amoxy LA ร่วมกับ Ketoprofen ทันทีในตัวที่ชัก/ข้อบวม และผสม Amoxy WS ละลายน้ำให้ทั้งฝูงกินป้องกัน 5 วัน'
+            },
+            {
+                id: 'dis_mange_skin',
+                name: 'ขี้เรื้อนสุกรและผิวหนังอักเสบสะเก็ดมัน (Mange & Greasy Pig)',
+                scientific: 'Sarcoptes scabiei / Staphylococcus hyicus',
+                stage: 'all',
+                severity: 'medium',
+                symptomsList: ['ผิวหนังมันเยิ้ม มีสะเก็ดสีน้ำตาลดำทั่วตัว คันสะบัดหู', 'แคระแกร็น โตช้า ขนหยาบ', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'skin_crust, stunt_growth, off_feed',
+                recommendedDrugIds: ['amox_15_la', 'vitamin_ad3e_inj'],
+                management: 'พ่นน้ำยาฆ่าเชื้อทำความสะอาดโรงเรือน ฉีดไอเวอร์เมกตินรักษาขี้เรื้อน และฉีด Amoxy LA ในตัวที่มีผิวหนังติดเชื้อแบคทีเรียแทรกซ้อน บำรุงด้วยวิตามิน AD3E'
+            },
+            {
+                id: 'dis_sow_mma',
+                name: 'กลุ่มอาการเต้านมอักเสบ มดลูกอักเสบ นมแห้งหลังคลอด (Sow MMA Syndrome)',
+                scientific: 'Mastitis-Metritis-Agalactia Complex',
+                stage: 'sow',
+                severity: 'high',
+                symptomsList: ['เต้านมแม่สุกรบวมแดงแข็ง นมแห้ง มีหนองไหลจากช่องคลอดหลังคลอด', 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน', 'ปฏิเสธอาหาร ผอมแห้งเร็ว'],
+                symptomsKeywords: 'sow_mastitis, high_fever, off_feed',
+                recommendedDrugIds: ['amox_15_la', 'flunixin_50', 'synulox_rtu'],
+                management: 'ฉีด Amoxy LA หรือ Synulox RTU ร่วมกับ Flunixin Meglumine เพื่อลดไข้และลดบวมเต้านม และให้สารอาหารบำรุงแม่พันธุ์หลังคลอด'
+            },
+            {
+                id: 'dis_iron_deficiency',
+                name: 'ภาวะโลหิตจางและแคระแกร็นในลูกสุกรดูดนม (Piglet Anemia)',
+                scientific: 'Iron Deficiency Anemia',
+                stage: 'suckling',
+                severity: 'medium',
+                symptomsList: ['ลูกสุกรตัวซีดขาว ขนหยาบ แคระแกร็น เหนื่อยง่าย', 'ขี้เหลวสีเหลือง/ขาว เป็นน้ำ ก้นเปียก ขาดน้ำ'],
+                symptomsKeywords: 'piglet_pale, diarrhea_yellow',
+                recommendedDrugIds: ['toltrazuril_5_oral', 'vitamin_ad3e_inj'],
+                management: 'ฉีดเหล็กสูตรผสม Forceris (ธาตุเหล็ก + Toltrazuril) 1.5 cc เข้ากล้ามเนื้อหลังใบหูให้ลูกสุกรอายุ 24 ชั่วโมง เพื่อป้องกันโลหิตจางและโรคบิดพร้อมกัน'
+            },
+            // --- โรคที่เพิ่มเข้ามาใหม่ตามหลักระบาดวิทยาและมาตรฐานฟาร์ม ---
+            {
+                id: 'dis_asf',
+                name: 'โรคอหิวาต์แอฟริกาในสุกร (ASF)',
+                scientific: 'African Swine Fever Virus (ASFV)',
+                stage: 'all',
+                severity: 'critical',
+                symptomsList: ['ไข้สูงนอนสุม ท้องเสีย ถ่ายเป็นมูกเลือด', 'ผิวหนังเป็นจุดเลือดออก คราบบลู/ม่วงช้ำบริเวณใบหู ท้อง และขาหลัง', 'แท้งเฉียบพลันในแม่พันธุ์อุ้มท้อง ทุกช่วงอายุตายเฉียบพลันเกือบ 100%'],
+                symptomsKeywords: 'high_fever, diarrhea_blood, skin_crust, off_feed',
+                recommendedDrugIds: ['beta_superior_gq4'],
+                management: 'เป็นโรคระบาดร้ายแรง ไม่มียารักษาและวัคซีน ให้ทำลายสุกรในรัศมีควบคุมทันที พ่นยาฆ่าเชื้อสูตรเข้มข้น (GQ4 อัตราส่วน 1:100) ทั่วฟาร์ม ยกระดับ Biosecurity สูงสุด'
+            },
+            {
+                id: 'dis_prrs',
+                name: 'โรคพีอาร์อาร์เอส / กลุ่มอาการทางเดินหายใจและระบบสืบพันธุ์สุกร (PRRS)',
+                scientific: 'Porcine Reproductive and Respiratory Syndrome Virus',
+                stage: 'all',
+                severity: 'high',
+                symptomsList: ['แม่พันธุ์แท้งระยะท้าย คลอดลูกตายโคม ลูกกรอกจำนวนมาก', 'ลูกสุกรและสุกรขุนทางเดินหายใจล้มเหลว ไอหอบลึก ตัวซีด แคระแกร็น', 'ปลายหูและหางมีสีม่วงช้ำเนื่องจากเส้นเลือดส่วนปลายอุดตัน ปฏิเสธอาหาร'],
+                symptomsKeywords: 'pump_breathing, piglet_pale, off_feed, stunt_growth',
+                recommendedDrugIds: ['florfenicol_300', 'pacetam_20_oral', 'biolyte_vit_c', 'vitamin_ad3e_inj'],
+                management: 'แยกสุกรป่วยทำลายภูมิคุ้มกัน ให้ยาลดไข้พราซีเตมละลายน้ำคุมฝูง ฉีดปฏิชีวนะลดการติดเชื้อแทรกซ้อน และทำโปรแกรมวัคซีนในฝูงทดแทนอย่างเข้มงวด'
+            },
+            {
+                id: 'dis_ped',
+                name: 'โรคท้องเสียระบาดเฉียบพลันในสุกร (PED)',
+                scientific: 'Porcine Epidemic Diarrhea Virus',
+                stage: 'suckling',
+                severity: 'critical',
+                symptomsList: ['ลูกสุกรดูดนมท้องเสียขี้เหลวเป็นน้ำสีเหลืองพุ่งรุนแรง', 'อาเจียนบ่อยครั้ง ปฏิเสธอาหาร ขาดน้ำรุนแรง ตาโหล ตัวแห้งเหี่ยว', 'อัตราการตายในลูกสุกรอายุต่ำกว่า 7 วัน สูงถึง 100%'],
+                symptomsKeywords: 'diarrhea_yellow, vomiting, dehydration, off_feed',
+                recommendedDrugIds: ['dosto_emulsion', 'biolyte_vit_c', 'beta_superior_gq4'],
+                management: 'ให้สารละลายอิเล็กโทรไลต์ชดเชยการขาดน้ำ ป้อน Dosto Emulsion พยุงลำไส้ และทำความสะอาดคอกคลอดพ่นฆ่าเชื้อตัดวงจรโรคด้วยความร้อนและยาฆ่าเชื้อ GQ4'
+            },
+            {
+                id: 'dis_fmd',
+                name: 'โรคปากและเท้าเปื่อย (FMD)',
+                scientific: 'Foot and Mouth Disease Virus',
+                stage: 'all',
+                severity: 'high',
+                symptomsList: ['มีเม็ดตุ่มพองและแผลลอกบริเวณริมฝีปาก ลิ้น และจมูก น้ำลายไหลยืด', 'เกิดแผลเจ็บที่ร่องกีบและไรกีบ กีบหลุด เดินกะเผลก ลุกไม่ขึ้น ยืนสั่น', 'ไข้สูงมาก ปฏิเสธอาหาร ลูกสุกรเล็กอาจตายเฉียบพลันจากกล้ามเนื้อหัวใจตาย'],
+                symptomsKeywords: 'high_fever, joint_swelling, off_feed',
+                recommendedDrugIds: ['bezter_analgin_500', 'amox_15_la', 'beta_superior_gq4'],
+                management: 'พ่นยาฆ่าเชื้อแผลที่กีบด้วยน้ำยาเฉพาะ ฉีดแอนาลจินลดปวดลดไข้เพื่อให้สุกรยังกินอาหารได้ ฉีด Amoxy LA ป้องกันกีบอักเสบติดเชื้อลุกลาม แยกสัตว์ป่วยเด็ดขาด'
+            }
+
+        ];
+
+        const MASTER_SYMPTOMS_CATALOG = [
+            {
+                category: '🫁 ระบบทางเดินหายใจ & ปอด',
+                symptoms: [
+                    { id: 'cough_dry', label: 'ไอแห้งๆ เรื้อรังช่วงเช้าหรือตอนไล่ฝูง' },
+                    { id: 'pump_breathing', label: 'หายใจหอบลึก ซี่โครงกระเพื่อม (หายใจทางปาก)' },
+                    { id: 'bloody_nose', label: 'มีฟองเลือดปนหนองไหลออกจมูก/ปาก ตายเฉียบพลัน' }
+                ]
+            },
+            {
+                category: '🧪 ระบบทางเดินอาหาร & มูล',
+                symptoms: [
+                    { id: 'diarrhea_yellow', label: 'ขี้เหลวสีเหลือง/ขาว เป็นน้ำ ก้นเปียก ขาดน้ำ' },
+                    { id: 'diarrhea_blood', label: 'ถ่ายเป็นมูกเลือด ขี้สีดำคล้ายซีอิ๊วหรือมีลิ่มเลือด' },
+                    { id: 'vomiting', label: 'อาเจียน ปฏิเสธอาหาร ผอมแห้งเร็ว' }
+                ]
+            },
+            {
+                category: '⚡ ไข้สูง, ข้อบวม & ระบบประสาท',
+                symptoms: [
+                    { id: 'high_fever', label: 'ไข้สูงมาก (>40.5°C) ตัวแดง นอนสุมกัน' },
+                    { id: 'joint_swelling', label: 'ข้อเข่า/ข้อเท้าบวมโต เจ็บขา เดินกะเผลก ลุกไม่ขึ้น' },
+                    { id: 'neuro_seizure', label: 'นอนตะแคงขาพายน้ำ ชักเกร็ง คอเอียง ตาโปน' }
+                ]
+            },
+            {
+                category: '🩹 ผิวหนัง, เต้านมแม่พันธุ์ & ลูกสุกร',
+                symptoms: [
+                    { id: 'skin_crust', label: 'ผิวหนังมันเยิ้ม มีสะเก็ดสีน้ำตาลดำทั่วตัว คันสะบัดหู' },
+                    { id: 'sow_mastitis', label: 'เต้านมแม่สุกรบวมแดงแข็ง นมแห้ง มีหนองไหลจากช่องคลอดหลังคลอด' },
+                    { id: 'piglet_pale', label: 'ลูกสุกรตัวซีดขาว ขนหยาบ แคระแกร็น เหนื่อยง่าย' }
+                ]
+            }
+        ];
+
+        let appState = {
+            drugs: [],
+            diseases: [],
+            treatmentLogs: [],
+            currentDiagStage: 'all',
+            selectedSymptoms: new Set(),
+            currentCalcRoute: 'inject',
+            selectedCalcDrugId: null,
+            farmSettings: {
+                name: 'สว่างฟาร์มสุกรมาตรฐาน GAP',
+                manager: 'คุณสมศักดิ์ นิลเจริญ',
+                province: 'ราชบุรี',
+                totalHeads: 1200
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDatabaseFromStorage();
+            initDateFields();
+            renderSymptomCheckboxes();
+            populateCalculatorDropdown();
+            renderFormularyGrid();
+            renderTreatmentLogsTable();
+            renderAdminDiseasesList();
+            renderAdminDrugsTable();
+            updateFarmHeaderDisplay();
+            runDosageCalculation();
+        });
+
+        function initDateFields() {
+            const today = new Date().toISOString().split('T')[0];
+            const startDateEl = document.getElementById('calc-input-start-date');
+            if (startDateEl) startDateEl.value = today;
+        }
+
+        function loadDatabaseFromStorage() {
+            try {
+                const storedDrugs = localStorage.getItem('pig_pharm_drugs');
+                const storedDiseases = localStorage.getItem('pig_pharm_diseases');
+                const storedLogs = localStorage.getItem('pig_pharm_treatment_logs');
+                const storedFarm = localStorage.getItem('pig_pharm_farm_settings');
+
+                appState.drugs = storedDrugs ? JSON.parse(storedDrugs) : [...DEFAULT_MASTER_DRUGS];
+                appState.diseases = storedDiseases ? JSON.parse(storedDiseases) : [...DEFAULT_MASTER_DISEASES];
+                appState.treatmentLogs = storedLogs ? JSON.parse(storedLogs) : [];
+                if (storedFarm) appState.farmSettings = JSON.parse(storedFarm);
+            } catch (e) {
+                console.warn('LocalStorage fallback to defaults', e);
+                appState.drugs = [...DEFAULT_MASTER_DRUGS];
+                appState.diseases = [...DEFAULT_MASTER_DISEASES];
+                appState.treatmentLogs = [];
+            }
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem('pig_pharm_drugs', JSON.stringify(appState.drugs));
+                localStorage.setItem('pig_pharm_diseases', JSON.stringify(appState.diseases));
+                localStorage.setItem('pig_pharm_treatment_logs', JSON.stringify(appState.treatmentLogs));
+                localStorage.setItem('pig_pharm_farm_settings', JSON.stringify(appState.farmSettings));
+            } catch (e) {
+                console.warn('Cannot write to LocalStorage', e);
+            }
+        }
+
+        function resetDefaultCentralDB() {
+            if (confirm('คุณต้องการรีเซ็ตฐานข้อมูลยาและโรคกลับเป็นค่ามาตรฐานจากสัตวแพทย์ส่วนกลางหรือไม่?')) {
+                appState.drugs = [...DEFAULT_MASTER_DRUGS];
+                appState.diseases = [...DEFAULT_MASTER_DISEASES];
+                saveStateToStorage();
+                populateCalculatorDropdown();
+                renderFormularyGrid();
+                renderAdminDiseasesList();
+                renderAdminDrugsTable();
+                runDiagnosisEvaluation();
+                alert('✅ คืนค่าฐานข้อมูลส่วนกลางมาตรฐานเรียบร้อยแล้ว');
+            }
+        }
+
+        function navigateTo(pageId, subtab = null) {
+            const pages = ['diagnosis', 'calculator', 'formulary', 'logs', 'admin'];
+            pages.forEach(p => {
+                const pageEl = document.getElementById(`page-${p}`);
+                const navBtn = document.getElementById(`nav-btn-${p}`);
+                const mobBtn = document.getElementById(`mob-nav-${p}`);
+
+                if (p === pageId) {
+                    if (pageEl) pageEl.classList.remove('hidden');
+                    if (navBtn) {
+                        navBtn.className = 'nav-tab px-3.5 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 bg-emerald-700/80 text-white shadow-inner';
+                    }
+                    if (mobBtn) {
+                        mobBtn.className = 'px-3 py-1.5 rounded-lg whitespace-nowrap bg-emerald-700 text-white font-medium';
+                    }
+                } else {
+                    if (pageEl) pageEl.classList.add('hidden');
+                    if (navBtn) {
+                        navBtn.className = 'nav-tab px-3.5 py-2 rounded-xl text-sm font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2';
+                    }
+                    if (mobBtn) {
+                        mobBtn.className = 'px-3 py-1.5 rounded-lg whitespace-nowrap bg-white/10 text-slate-200';
+                    }
+                }
+            });
+
+            if (pageId === 'admin' && subtab) {
+                switchAdminTab(subtab);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchAdminTab(tabName) {
+            const btnDiseases = document.getElementById('admin-subtab-diseases');
+            const btnDrugs = document.getElementById('admin-subtab-drugs');
+            const contentDiseases = document.getElementById('admin-content-diseases');
+            const contentDrugs = document.getElementById('admin-content-drugs');
+
+            if (tabName === 'diseases') {
+                btnDiseases.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white shadow-sm transition-all flex items-center justify-center gap-1.5';
+                btnDrugs.className = 'flex-1 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5';
+                contentDiseases.classList.remove('hidden');
+                contentDrugs.classList.add('hidden');
+            } else {
+                btnDrugs.className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-emerald-600 text-white shadow-sm transition-all flex items-center justify-center gap-1.5';
+                btnDiseases.className = 'flex-1 py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 transition-all flex items-center justify-center gap-1.5';
+                contentDrugs.classList.remove('hidden');
+                contentDiseases.classList.add('hidden');
+            }
+        }
+
+        function selectDiagStage(stage) {
+            appState.currentDiagStage = stage;
+            const buttons = document.querySelectorAll('.stage-filter-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-stage') === stage) {
+                    btn.className = 'stage-filter-btn active p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50/80 text-emerald-900 font-bold text-xs text-left transition-all';
+                } else {
+                    btn.className = 'stage-filter-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-left hover:border-emerald-500 hover:bg-emerald-50/50 transition-all';
+                }
+            });
+            runDiagnosisEvaluation();
+        }
+
+        function renderSymptomCheckboxes() {
+            const container = document.getElementById('diagnosis-symptoms-container');
+            if (!container) return;
+
+            let html = '';
+            MASTER_SYMPTOMS_CATALOG.forEach(group => {
+                html += `
+                    <div class="p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/80 symptom-category-box">
+                        <div class="text-xs font-bold text-teal-900 mb-2.5 flex items-center gap-1.5">
+                            ${group.category}
+                        </div>
+                        <div class="space-y-2 text-xs">
+                `;
+
+                group.symptoms.forEach(sym => {
+                    const isChecked = appState.selectedSymptoms.has(sym.id) ? 'checked' : '';
+                    html += `
+                        <label class="flex items-start gap-2.5 cursor-pointer hover:text-emerald-800 transition-all symptom-item-label" data-search="${sym.label.toLowerCase()}">
+                            <input type="checkbox" value="${sym.id}" onchange="toggleSymptom('${sym.id}', this.checked)" ${isChecked} class="symptom-chk mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4 border-slate-300">
+                            <span class="text-slate-700 font-medium leading-tight">${sym.label}</span>
+                        </label>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleSymptom(symptomId, isChecked) {
+            if (isChecked) {
+                appState.selectedSymptoms.add(symptomId);
+            } else {
+                appState.selectedSymptoms.delete(symptomId);
+            }
+
+            const countBadge = document.getElementById('selected-symptoms-count');
+            if (countBadge) countBadge.innerText = `เลือก ${appState.selectedSymptoms.size} อาการ`;
+
+            runDiagnosisEvaluation();
+        }
+
+        function filterSymptomCheckboxes() {
+            const query = (document.getElementById('diag-symptom-search')?.value || '').toLowerCase().trim();
+            const labels = document.querySelectorAll('.symptom-item-label');
+            labels.forEach(l => {
+                const text = l.getAttribute('data-search') || '';
+                if (!query || text.includes(query)) {
+                    l.style.display = 'flex';
+                } else {
+                    l.style.display = 'none';
+                }
+            });
+        }
+
+        function resetDiagnosis() {
+            appState.selectedSymptoms.clear();
+            const checkboxes = document.querySelectorAll('.symptom-chk');
+            checkboxes.forEach(c => c.checked = false);
+            const countBadge = document.getElementById('selected-symptoms-count');
+            if (countBadge) countBadge.innerText = `เลือก 0 อาการ`;
+            const searchInput = document.getElementById('diag-symptom-search');
+            if (searchInput) { searchInput.value = ''; filterSymptomCheckboxes(); }
+            runDiagnosisEvaluation();
+        }
+
+        function runDiagnosisEvaluation() {
+            const outputEl = document.getElementById('diag-cards-output');
+            const badgeEl = document.getElementById('diag-result-badge');
+            if (!outputEl) return;
+
+            const selectedList = Array.from(appState.selectedSymptoms);
+
+            if (selectedList.length === 0) {
+                if (badgeEl) {
+                    badgeEl.className = 'px-3 py-1 bg-slate-100 text-slate-600 font-bold text-xs rounded-full';
+                    badgeEl.innerText = 'รอเลือกอาการ';
+                }
+                outputEl.innerHTML = `
+                    <div class="text-center py-20 text-slate-400">
+                        <span class="text-6xl block mb-4">🩺</span>
+                        <h3 class="text-base font-bold text-slate-700">กรุณาเลือกระยะการเลี้ยงและติ๊กอาการทางซ้ายมือ</h3>
+                        <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">ระบบจะประเมินโรคที่มีโอกาสเกิดขึ้น เปอร์เซ็นต์ความน่าจะเป็น พร้อมจัดชุดยาฉีด ยาละลายน้ำ ยาผสมอาหาร และสารเสริมให้ทันที</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const currentStage = appState.currentDiagStage;
+            const scoredDiseases = [];
+
+            appState.diseases.forEach(dis => {
+                if (currentStage !== 'all' && dis.stage !== 'all' && dis.stage !== currentStage) {
+                    return;
+                }
+
+                const keywords = (dis.symptomsKeywords || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                let matchCount = 0;
+
+                selectedList.forEach(userSym => {
+                    if (keywords.includes(userSym.toLowerCase())) {
+                        matchCount += 1;
+                    }
+                });
+
+                if (matchCount > 0) {
+                    const score = Math.min(100, Math.round((matchCount / Math.max(1, Math.min(keywords.length, selectedList.length))) * 100));
+                    scoredDiseases.push({ disease: dis, score, matchCount });
+                }
+            });
+
+            scoredDiseases.sort((a, b) => b.score - a.score || b.matchCount - a.matchCount);
+
+            if (scoredDiseases.length === 0) {
+                if (badgeEl) {
+                    badgeEl.className = 'px-3 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full';
+                    badgeEl.innerText = 'ไม่พบโรคที่ตรงกันโดยตรง';
+                }
+                outputEl.innerHTML = `
+                    <div class="text-center py-16 text-slate-500 bg-amber-50/50 rounded-2xl border border-amber-200 p-6">
+                        <span class="text-5xl block mb-3">🔍</span>
+                        <h4 class="text-sm font-bold text-slate-800">ยังไม่พบโรคที่ตรงกับอาการที่เลือกพอดี</h4>
+                        <p class="text-xs text-slate-500 mt-1">ลองเลือกอาการเด่นเพิ่มเติม หรือสลับระยะการเลี้ยงเป็น "ทุกระยะการเลี้ยง" เพื่อขยายขอบเขตการประเมิน</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (badgeEl) {
+                badgeEl.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full';
+                badgeEl.innerText = `พบ ${scoredDiseases.length} โรคเข้าข่าย`;
+            }
+
+            let cardsHtml = '';
+            scoredDiseases.forEach(item => {
+                const dis = item.disease;
+                const score = item.score;
+                const scoreColor = score >= 80 ? 'bg-red-500 text-white' : score >= 50 ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white';
+                const recDrugs = (dis.recommendedDrugIds || []).map(id => appState.drugs.find(d => d.id === id)).filter(Boolean);
+
+                cardsHtml += `
+                    <div class="bg-white p-5 rounded-2xl border-2 ${score >= 70 ? 'border-emerald-500 shadow-md' : 'border-slate-200'} space-y-4 transition-all">
+                        <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${scoreColor}">
+                                        ความเข้ากันได้ ${score}%
+                                    </span>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                                        ระยะ: ${getStageThai(dis.stage)}
+                                    </span>
+                                </div>
+                                <h3 class="text-base font-extrabold text-slate-800 mt-1">${dis.name}</h3>
+                                <p class="text-xs font-semibold text-slate-400 italic">${dis.scientific}</p>
+                            </div>
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-xl ${getSeverityBadge(dis.severity)}">
+                                ${getSeverityThai(dis.severity)}
+                            </span>
+                        </div>
+
+                        <div class="p-3 bg-slate-50 rounded-xl text-xs border border-slate-200/80">
+                            <span class="font-bold text-slate-700">🩺 แนวทางการดูแลและสุขาภิบาล:</span>
+                            <p class="text-slate-600 mt-0.5">${dis.management}</p>
+                        </div>
+
+                        <div>
+                            <div class="text-xs font-bold text-slate-700 mb-2 flex items-center justify-between">
+                                <span>💊 ยาและสารเสริมที่แนะนำสำหรับโรคนี้:</span>
+                                <span class="text-[10px] text-slate-400">คลิกที่ยาเพื่อส่งเข้าเครื่องคำนวณ</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                `;
+
+                recDrugs.forEach(drug => {
+                    cardsHtml += `
+                        <div class="p-2.5 bg-emerald-50/60 hover:bg-emerald-100/80 border border-emerald-200 rounded-xl flex items-center justify-between gap-2 transition-all">
+                            <div class="min-w-0">
+                                <div class="font-bold text-xs text-emerald-900 truncate">${drug.tradeName}</div>
+                                <div class="text-[10px] text-emerald-700 truncate">${drug.genericName} (${getRouteThai(drug.route)})</div>
+                            </div>
+                            <button type="button" onclick="loadDrugToCalculator('${drug.id}', '${dis.name}')" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg whitespace-nowrap shadow-sm">
+                                🧮 คำนวณยา
+                            </button>
+                        </div>
+                    `;
+                });
+
+                cardsHtml += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            outputEl.innerHTML = cardsHtml;
+        }
+
+        function populateCalculatorDropdown(selectedId = null) {
+            const selectEl = document.getElementById('calc-drug-select');
+            if (!selectEl) return;
+
+            let html = '';
+            appState.drugs.forEach(d => {
+                const isSel = (selectedId && d.id === selectedId) || (!selectedId && d.id === appState.drugs[0]?.id) ? 'selected' : '';
+                html += `<option value="${d.id}" ${isSel}>${d.tradeName} [${getRouteThai(d.route)}] - ${d.genericName}</option>`;
+            });
+            selectEl.innerHTML = html;
+
+            if (selectedId) {
+                appState.selectedCalcDrugId = selectedId;
+            } else if (appState.drugs.length > 0) {
+                appState.selectedCalcDrugId = appState.drugs[0].id;
+            }
+        }
+
+        function onCalculatorDrugChange() {
+            const selectEl = document.getElementById('calc-drug-select');
+            if (!selectEl) return;
+            const drugId = selectEl.value;
+            appState.selectedCalcDrugId = drugId;
+            const drug = appState.drugs.find(d => d.id === drugId);
+            if (drug) {
+                setCalcRoute(drug.route);
+            }
+            runDosageCalculation();
+        }
+
+        function loadDrugToCalculator(drugId, diseaseName = '') {
+            navigateTo('calculator');
+            populateCalculatorDropdown(drugId);
+            const selectEl = document.getElementById('calc-drug-select');
+            if (selectEl) selectEl.value = drugId;
+            appState.selectedCalcDrugId = drugId;
+
+            const drug = appState.drugs.find(d => d.id === drugId);
+            if (drug) {
+                setCalcRoute(drug.route);
+            }
+
+            const penInput = document.getElementById('calc-input-pen');
+            if (penInput && diseaseName) {
+                penInput.value = `คอกป่วย - รักษา ${diseaseName}`;
+            }
+
+            runDosageCalculation();
+        }
+
+        function setCalcRoute(route) {
+            appState.currentCalcRoute = route;
+            const buttons = document.querySelectorAll('.route-btn');
+            buttons.forEach(btn => {
+                if (btn.id === `route-btn-${route}`) {
+                    btn.className = 'route-btn p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold text-xs text-center transition-all';
+                } else {
+                    btn.className = 'route-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all';
+                }
+            });
+            runDosageCalculation();
+        }
+
+        function runDosageCalculation() {
+            const drugId = appState.selectedCalcDrugId || document.getElementById('calc-drug-select')?.value;
+            const drug = appState.drugs.find(d => d.id === drugId);
+            if (!drug) return;
+
+            const heads = Math.max(1, parseFloat(document.getElementById('calc-input-heads')?.value || 1));
+            const weight = Math.max(0.5, parseFloat(document.getElementById('calc-input-weight')?.value || 10));
+            const days = Math.max(1, parseFloat(document.getElementById('calc-input-days')?.value || 1));
+            const startDateStr = document.getElementById('calc-input-start-date')?.value || new Date().toISOString().split('T')[0];
+            const route = appState.currentCalcRoute || drug.route;
+
+            const tradeNameEl = document.getElementById('calc-res-trade-name');
+            const genericNameEl = document.getElementById('calc-res-generic-name');
+            const indEl = document.getElementById('calc-res-indication');
+            const dirEl = document.getElementById('calc-res-directions');
+            const catBadge = document.getElementById('calc-res-category-badge');
+            const routePill = document.getElementById('calc-res-route-pill');
+            const withdrawalBadge = document.getElementById('calc-res-withdrawal-days');
+            const safeDateEl = document.getElementById('calc-res-safe-date');
+
+            if (tradeNameEl) tradeNameEl.innerText = drug.tradeName;
+            if (genericNameEl) genericNameEl.innerText = drug.genericName;
+            if (indEl) indEl.innerText = drug.indication;
+            if (dirEl) dirEl.innerText = drug.directions;
+            if (catBadge) catBadge.innerText = getCategoryThai(drug.category);
+            if (routePill) routePill.innerText = getRouteThai(route);
+            if (withdrawalBadge) withdrawalBadge.innerText = `${drug.withdrawalDays} วัน`;
+
+            const startDate = new Date(startDateStr);
+            const totalTreatmentTime = days;
+            const safeDate = new Date(startDate);
+            safeDate.setDate(safeDate.getDate() + totalTreatmentTime + (drug.withdrawalDays || 0));
+            const dateOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+            if (safeDateEl) safeDateEl.innerText = safeDate.toLocaleDateString('th-TH', dateOptions);
+
+            const valPerHeadEl = document.getElementById('calc-val-per-head');
+            const unitPerHeadEl = document.getElementById('calc-unit-per-head');
+            const valPerDayEl = document.getElementById('calc-val-per-day');
+            const unitPerDayEl = document.getElementById('calc-unit-per-day');
+            const valGrandTotalEl = document.getElementById('calc-val-grand-total');
+            const unitGrandTotalEl = document.getElementById('calc-unit-grand-total');
+            const intakeHelper = document.getElementById('calc-intake-helper');
+
+            const waterPerDayHerd = heads * (weight * 0.10);
+            const feedPerDayHerdKg = heads * (weight * 0.04);
+
+            const waterEstEl = document.getElementById('calc-water-estimate');
+            const feedEstEl = document.getElementById('calc-feed-estimate');
+            if (waterEstEl) waterEstEl.innerText = `${waterPerDayHerd.toFixed(1)} ลิตร/วัน`;
+            if (feedEstEl) feedEstEl.innerText = `${feedPerDayHerdKg.toFixed(1)} กก./วัน`;
+
+            if (route === 'inject') {
+                if (intakeHelper) intakeHelper.classList.add('hidden');
+                const dosePer10kg = drug.doseInjectPer10kg || 1.0;
+                const mlPerHead = (weight / 10.0) * dosePer10kg;
+                const mlTotalDay = mlPerHead * heads;
+                const mlGrandTotal = mlTotalDay * days;
+
+                if (valPerHeadEl) valPerHeadEl.innerText = mlPerHead.toFixed(2);
+                if (unitPerHeadEl) unitPerHeadEl.innerText = 'ml / ตัว / ครั้ง';
+                if (valPerDayEl) valPerDayEl.innerText = mlTotalDay.toFixed(1);
+                if (unitPerDayEl) unitPerDayEl.innerText = `ml / วัน (${heads} ตัว)`;
+                if (valGrandTotalEl) valGrandTotalEl.innerText = mlGrandTotal.toFixed(1);
+                if (unitGrandTotalEl) unitGrandTotalEl.innerText = `ml (รวม ${days} วัน)`;
+            } else if (route === 'water') {
+                if (intakeHelper) intakeHelper.classList.remove('hidden');
+                const dosePerL = drug.doseWaterPerL || 0.5;
+                const dosePerDayHerd = waterPerDayHerd * dosePerL;
+                const dosePerHeadDay = dosePerDayHerd / heads;
+                const grandTotal = dosePerDayHerd * days;
+
+                if (valPerHeadEl) valPerHeadEl.innerText = dosePerHeadDay.toFixed(2);
+                if (unitPerHeadEl) unitPerHeadEl.innerText = 'g หรือ ml / ตัว / วัน';
+                if (valPerDayEl) valPerDayEl.innerText = dosePerDayHerd.toFixed(1);
+                if (unitPerDayEl) unitPerDayEl.innerText = `g หรือ ml / วัน (น้ำ ${waterPerDayHerd.toFixed(0)} ลิตร)`;
+                if (valGrandTotalEl) valGrandTotalEl.innerText = grandTotal.toFixed(1);
+                if (unitGrandTotalEl) unitGrandTotalEl.innerText = `g หรือ ml (รวม ${days} วัน)`;
+            } else if (route === 'feed') {
+                if (intakeHelper) intakeHelper.classList.remove('hidden');
+                const dosePerTon = drug.doseFeedPerTon || 1.0;
+                const feedTonsPerDay = feedPerDayHerdKg / 1000.0;
+                const doseKgPerDay = feedTonsPerDay * dosePerTon;
+                const doseGramsPerDay = doseKgPerDay * 1000.0;
+                const dosePerHead = doseGramsPerDay / heads;
+                const grandTotalKg = doseKgPerDay * days;
+
+                if (valPerHeadEl) valPerHeadEl.innerText = dosePerHead.toFixed(1);
+                if (unitPerHeadEl) unitPerHeadEl.innerText = 'กรัม / ตัว / วัน';
+                if (valPerDayEl) valPerDayEl.innerText = doseGramsPerDay >= 1000 ? `${(doseGramsPerDay/1000).toFixed(2)} กก.` : `${doseGramsPerDay.toFixed(0)} กรัม`;
+                if (unitPerDayEl) unitPerDayEl.innerText = `/ วัน (อาหาร ${feedPerDayHerdKg.toFixed(0)} กก.)`;
+                if (valGrandTotalEl) valGrandTotalEl.innerText = grandTotalKg >= 1 ? `${grandTotalKg.toFixed(2)} กก.` : `${(grandTotalKg*1000).toFixed(0)} กรัม`;
+                if (unitGrandTotalEl) unitGrandTotalEl.innerText = `พรีมิกซ์รวม ${days} วัน`;
+            }
+        }
+
+        function saveDirectTreatmentLog() {
+            const drugId = appState.selectedCalcDrugId || document.getElementById('calc-drug-select')?.value;
+            const drug = appState.drugs.find(d => d.id === drugId);
+            if (!drug) {
+                alert('กรุณาเลือกตัวยาก่อนทำการบันทึก');
+                return;
+            }
+
+            const heads = parseInt(document.getElementById('calc-input-heads')?.value || 1);
+            const weight = parseFloat(document.getElementById('calc-input-weight')?.value || 10);
+            const days = parseInt(document.getElementById('calc-input-days')?.value || 1);
+            const startDate = document.getElementById('calc-input-start-date')?.value || new Date().toISOString().split('T')[0];
+            const penName = document.getElementById('calc-input-pen')?.value.trim() || 'คอกสุกรรักษา';
+            const route = appState.currentCalcRoute || drug.route;
+
+            const sDate = new Date(startDate);
+            const safeDate = new Date(sDate);
+            safeDate.setDate(safeDate.getDate() + days + (drug.withdrawalDays || 0));
+            const safeDateStr = safeDate.toISOString().split('T')[0];
+
+            const valPerDay = document.getElementById('calc-val-per-day')?.innerText || '';
+            const unitPerDay = document.getElementById('calc-unit-per-day')?.innerText || '';
+
+            const logEntry = {
+                id: 'log_' + Date.now(),
+                timestamp: new Date().toISOString(),
+                startDate: startDate,
+                pen: penName,
+                heads: heads,
+                weight: weight,
+                days: days,
+                drugId: drug.id,
+                drugName: drug.tradeName,
+                route: route,
+                dayDoseText: `${valPerDay} ${unitPerDay}`,
+                withdrawalDays: drug.withdrawalDays || 0,
+                safeDate: safeDateStr
+            };
+
+            appState.treatmentLogs.unshift(logEntry);
+            saveStateToStorage();
+            renderTreatmentLogsTable();
+
+            alert(`✅ บันทึกประวัติการรักษาของ "${penName}" เรียบร้อยแล้ว!
+สามารถตรวจสอบสถานะระยะหยุดยาได้ที่เมนู "บันทึกการรักษา"`);
+            navigateTo('logs');
+        }
+
+        function renderTreatmentLogsTable() {
+            const tbody = document.getElementById('logs-table-body');
+            const countEl = document.getElementById('logs-count');
+            const alertContainer = document.getElementById('logs-withdrawal-alerts');
+            const badgeActiveLogs = document.getElementById('badge-active-logs');
+            if (!tbody) return;
+
+            const logs = appState.treatmentLogs || [];
+            if (countEl) countEl.innerText = logs.length;
+
+            const today = new Date().toISOString().split('T')[0];
+            let activeWithdrawalCount = 0;
+            let alertsHtml = '';
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="11" class="text-center py-10 text-slate-400 font-medium">
+                            ยังไม่มีประวัติการให้ยา สามารถกดคำนวณยาแล้วกด "บันทึกเข้าประวัติการรักษาจริง"
+                        </td>
+                    </tr>
+                `;
+                if (alertContainer) alertContainer.innerHTML = '';
+                if (badgeActiveLogs) badgeActiveLogs.classList.add('hidden');
+                return;
+            }
+
+            let rowsHtml = '';
+            logs.forEach(log => {
+                const isUnderWithdrawal = log.safeDate >= today;
+                if (isUnderWithdrawal) activeWithdrawalCount++;
+
+                const statusBadge = isUnderWithdrawal
+                    ? `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">⚠️ ติดระยะหยุดยา</span>`
+                    : `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">✅ ปลอดภัย พ้นระยะ</span>`;
+
+                rowsHtml += `
+                    <tr class="hover:bg-slate-50 transition-all font-medium">
+                        <td class="p-3.5 whitespace-nowrap font-bold text-slate-800">${log.startDate}</td>
+                        <td class="p-3.5 whitespace-nowrap font-bold text-teal-900">${log.pen}</td>
+                        <td class="p-3.5 whitespace-nowrap">${log.heads} ตัว</td>
+                        <td class="p-3.5 whitespace-nowrap">${log.weight} กก.</td>
+                        <td class="p-3.5 whitespace-nowrap font-bold text-slate-800">${log.drugName}</td>
+                        <td class="p-3.5 whitespace-nowrap">${getRouteThai(log.route)}</td>
+                        <td class="p-3.5 whitespace-nowrap text-slate-600">${log.dayDoseText}</td>
+                        <td class="p-3.5 whitespace-nowrap font-bold text-amber-800">${log.withdrawalDays} วัน</td>
+                        <td class="p-3.5 whitespace-nowrap font-extrabold ${isUnderWithdrawal ? 'text-amber-700' : 'text-emerald-700'}">${log.safeDate}</td>
+                        <td class="p-3.5 whitespace-nowrap text-center">${statusBadge}</td>
+                        <td class="p-3.5 whitespace-nowrap text-center">
+                            <button onclick="deleteTreatmentLog('${log.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all" title="ลบรายการ">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>
+                `;
+
+                if (isUnderWithdrawal) {
+                    alertsHtml += `
+                        <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-200 flex items-center justify-between text-xs text-amber-950">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xl">⚠️</span>
+                                <div>
+                                    <span class="font-extrabold underline">${log.pen}</span> (${log.heads} ตัว) ได้รับยา <span class="font-bold">${log.drugName}</span>
+                                    <span class="text-amber-800 ml-1">ห้ามส่งโรงเชือดจนถึงวันที่ <span class="font-extrabold text-amber-900">${log.safeDate}</span></span>
+                                </div>
+                            </div>
+                            <span class="font-bold text-amber-900 bg-amber-200 px-2.5 py-1 rounded-full text-[10px]">ระยะหยุดยา ${log.withdrawalDays} วัน</span>
+                        </div>
+                    `;
+                }
+            });
+
+            tbody.innerHTML = rowsHtml;
+            if (alertContainer) alertContainer.innerHTML = alertsHtml;
+
+            if (badgeActiveLogs) {
+                if (activeWithdrawalCount > 0) {
+                    badgeActiveLogs.innerText = activeWithdrawalCount;
+                    badgeActiveLogs.classList.remove('hidden');
+                } else {
+                    badgeActiveLogs.classList.add('hidden');
+                }
+            }
+        }
+
+        function deleteTreatmentLog(logId) {
+            if (confirm('คุณต้องการลบประวัติการรักษานี้ใช่หรือไม่?')) {
+                appState.treatmentLogs = appState.treatmentLogs.filter(l => l.id !== logId);
+                saveStateToStorage();
+                renderTreatmentLogsTable();
+            }
+        }
+
+        function clearAllLogs() {
+            if (confirm('คุณต้องการล้างประวัติการรักษาทั้งหมดในระบบใช่หรือไม่?')) {
+                appState.treatmentLogs = [];
+                saveStateToStorage();
+                renderTreatmentLogsTable();
+            }
+        }
+
+        function exportLogsToCSV() {
+            if (!appState.treatmentLogs || appState.treatmentLogs.length === 0) {
+                alert('ยังไม่มีข้อมูลการรักษาสำหรับส่งออก');
+                return;
+            }
+
+            let csv = '\uFEFF';
+            csv += 'วันที่เริ่มให้ยา,คอก/โรงเรือน,จำนวนสุกร(ตัว),นน.เฉลี่ย(กก.),ชื่อยา,ช่องทางให้ยา,ปริมาณรวมต่อวัน,ระยะหยุดยา(วัน),วันพ้นระยะหยุดยา\n';
+
+            appState.treatmentLogs.forEach(l => {
+                csv += `"${l.startDate}","${l.pen}","${l.heads}","${l.weight}","${l.drugName}","${getRouteThai(l.route)}","${l.dayDoseText}","${l.withdrawalDays}","${l.safeDate}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `GAP_Swine_Treatment_Log_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        let activeFormularyCat = 'all';
+
+        function filterFormularyCategory(cat) {
+            activeFormularyCat = cat;
+            const pills = document.querySelectorAll('.cat-pill');
+            pills.forEach(p => {
+                p.className = 'cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap';
+            });
+            event.target.className = 'cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold bg-emerald-600 text-white whitespace-nowrap';
+            renderFormularyGrid();
+        }
+
+        function renderFormularyGrid() {
+            const grid = document.getElementById('formulary-cards-grid');
+            if (!grid) return;
+
+            const query = (document.getElementById('formulary-search')?.value || '').toLowerCase().trim();
+
+            const filtered = appState.drugs.filter(d => {
+                const matchCat = activeFormularyCat === 'all' || d.category === activeFormularyCat;
+                const matchQuery = !query ||
+                    d.tradeName.toLowerCase().includes(query) ||
+                    d.genericName.toLowerCase().includes(query) ||
+                    d.indication.toLowerCase().includes(query);
+                return matchCat && matchQuery;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 text-slate-400">
+                        <span class="text-5xl block mb-2">🔍</span>
+                        <p class="text-sm font-bold">ไม่พบยาหรือสารเสริมที่ตรงกับการค้นหา</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(d => {
+                html += `
+                    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-all">
+                        <div class="space-y-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                    ${getCategoryThai(d.category)}
+                                </span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900">
+                                    หยุดยา ${d.withdrawalDays} วัน
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <div class="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
+                                    ${d.image ? `<img src="${d.image}" alt="${d.tradeName}" class="w-full h-full object-cover">` : '💊'}
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="font-extrabold text-sm text-slate-800 truncate">${d.tradeName}</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium truncate">${d.genericName}</p>
+                                    <span class="text-[10px] font-semibold text-teal-700">${getRouteThai(d.route)}</span>
+                                </div>
+                            </div>
+
+                            <div class="p-2.5 bg-slate-50 rounded-xl text-xs space-y-1 border border-slate-100">
+                                <div class="font-bold text-slate-700">สรรพคุณ:</div>
+                                <p class="text-slate-600 text-[11px] leading-tight line-clamp-2">${d.indication}</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <button onclick="loadDrugToCalculator('${d.id}')" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center justify-center gap-1">
+                                <span>🧮</span> คำนวณขนาดยา
+                            </button>
+                            <button onclick="openEditDrugModal('${d.id}')" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl" title="แก้ไขข้อมูลยา">
+                                ✏️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function renderAdminDiseasesList() {
+            const container = document.getElementById('admin-disease-cards-container');
+            const countEl = document.getElementById('admin-diseases-count');
+            if (!container) return;
+
+            const diseases = appState.diseases || [];
+            if (countEl) countEl.innerText = diseases.length;
+
+            let html = '';
+            diseases.forEach(dis => {
+                html += `
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                        <div class="flex items-start justify-between gap-2 pb-2 border-b border-slate-100">
+                            <div>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+                                    ระยะ: ${getStageThai(dis.stage)}
+                                </span>
+                                <h4 class="font-extrabold text-sm text-slate-800 mt-1">${dis.name}</h4>
+                                <p class="text-[11px] text-slate-400 italic">${dis.scientific}</p>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="openEditDiseaseModal('${dis.id}')" class="p-1.5 bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 rounded-lg text-xs font-bold" title="แก้ไข">✏️</button>
+                                <button onclick="deleteDisease('${dis.id}')" class="p-1.5 bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-700 rounded-lg text-xs font-bold" title="ลบ">🗑️</button>
+                            </div>
+                        </div>
+
+                        <div class="text-xs space-y-1">
+                            <span class="font-bold text-slate-700">คีย์เวิร์ดอาการประเมิน:</span>
+                            <div class="flex flex-wrap gap-1 mt-1">
+                                ${(dis.symptomsKeywords || '').split(',').map(k => `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-semibold text-[10px]">${k.trim()}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="text-xs">
+                            <span class="font-bold text-slate-700">คำแนะนำ:</span>
+                            <p class="text-slate-600 text-[11px] mt-0.5 line-clamp-2">${dis.management}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderAdminDrugsTable() {
+            const tbody = document.getElementById('admin-drugs-table-body');
+            const countEl = document.getElementById('admin-drugs-count');
+            if (!tbody) return;
+
+            const drugs = appState.drugs || [];
+            if (countEl) countEl.innerText = drugs.length;
+
+            let html = '';
+            drugs.forEach(d => {
+                html += `
+                    <tr class="hover:bg-slate-50 transition-all font-medium">
+                        <td class="p-3.5 whitespace-nowrap font-bold text-slate-800">${d.tradeName}</td>
+                        <td class="p-3.5 whitespace-nowrap text-slate-600">${d.genericName}</td>
+                        <td class="p-3.5 whitespace-nowrap"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${getCategoryThai(d.category)}</span></td>
+                        <td class="p-3.5 whitespace-nowrap">${getRouteThai(d.route)}</td>
+                        <td class="p-3.5 whitespace-nowrap font-bold text-emerald-800">${d.route === 'inject' ? d.doseInjectPer10kg + ' ml/10kg' : d.route === 'water' ? d.doseWaterPerL + ' g/L' : d.doseFeedPerTon + ' kg/ตัน'}</td>
+                        <td class="p-3.5 whitespace-nowrap font-bold text-amber-800">${d.withdrawalDays} วัน</td>
+                        <td class="p-3.5 whitespace-nowrap text-center">
+                            <button onclick="openEditDrugModal('${d.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 font-bold" title="แก้ไข">✏️</button>
+                            <button onclick="deleteDrug('${d.id}')" class="p-1.5 rounded-lg text-slate-500 hover:text-red-700 hover:bg-red-50 font-bold" title="ลบ">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        function closeModal(modalId) {
+            const el = document.getElementById(modalId);
+            if (el) el.classList.add('hidden');
+        }
+
+        function openAddDiseaseModal() {
+            document.getElementById('modal-disease-title').innerText = '➕ เพิ่มข้อมูลโรคและเกณฑ์ประเมินใหม่';
+            document.getElementById('edit-disease-id').value = '';
+            document.getElementById('edit-disease-name').value = '';
+            document.getElementById('edit-disease-scientific').value = '';
+            document.getElementById('edit-disease-stage').value = 'all';
+            document.getElementById('edit-disease-severity').value = 'medium';
+            document.getElementById('edit-disease-symptoms').value = '';
+            document.getElementById('edit-disease-management').value = '';
+
+            renderModalDiseaseDrugsChecklist([]);
+            document.getElementById('modal-disease').classList.remove('hidden');
+        }
+
+        function openEditDiseaseModal(disId) {
+            const dis = appState.diseases.find(d => d.id === disId);
+            if (!dis) return;
+
+            document.getElementById('modal-disease-title').innerText = '✏️ แก้ไขข้อมูลโรคและเกณฑ์ประเมิน';
+            document.getElementById('edit-disease-id').value = dis.id;
+            document.getElementById('edit-disease-name').value = dis.name;
+            document.getElementById('edit-disease-scientific').value = dis.scientific;
+            document.getElementById('edit-disease-stage').value = dis.stage || 'all';
+            document.getElementById('edit-disease-severity').value = dis.severity || 'medium';
+            document.getElementById('edit-disease-symptoms').value = dis.symptomsKeywords || '';
+            document.getElementById('edit-disease-management').value = dis.management || '';
+
+            renderModalDiseaseDrugsChecklist(dis.recommendedDrugIds || []);
+            document.getElementById('modal-disease').classList.remove('hidden');
+        }
+
+        function renderModalDiseaseDrugsChecklist(selectedDrugIds = []) {
+            const container = document.getElementById('edit-disease-drugs-checklist');
+            if (!container) return;
+
+            let html = '';
+            appState.drugs.forEach(drug => {
+                const isChecked = selectedDrugIds.includes(drug.id) ? 'checked' : '';
+                html += `
+                    <label class="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-slate-200 cursor-pointer text-[11px]">
+                        <input type="checkbox" name="dis-drug-chk" value="${drug.id}" ${isChecked} class="rounded text-emerald-600 focus:ring-emerald-500">
+                        <span class="truncate font-semibold text-slate-700">${drug.tradeName}</span>
+                    </label>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function saveDiseaseFromModal(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-disease-id').value || ('dis_' + Date.now());
+            const name = document.getElementById('edit-disease-name').value.trim();
+            const scientific = document.getElementById('edit-disease-scientific').value.trim();
+            const stage = document.getElementById('edit-disease-stage').value;
+            const severity = document.getElementById('edit-disease-severity').value;
+            const symptomsKeywords = document.getElementById('edit-disease-symptoms').value.trim();
+            const management = document.getElementById('edit-disease-management').value.trim();
+
+            const checkedDrugs = Array.from(document.querySelectorAll("input[name='dis-drug-chk']:checked")).map(c => c.value);
+
+            const diseaseObj = {
+                id,
+                name,
+                scientific,
+                stage,
+                severity,
+                symptomsKeywords,
+                symptomsList: symptomsKeywords.split(',').map(s => s.trim()),
+                recommendedDrugIds: checkedDrugs,
+                management
+            };
+
+            const existingIndex = appState.diseases.findIndex(d => d.id === id);
+            if (existingIndex >= 0) {
+                appState.diseases[existingIndex] = diseaseObj;
+            } else {
+                appState.diseases.push(diseaseObj);
+            }
+
+            saveStateToStorage();
+            renderAdminDiseasesList();
+            runDiagnosisEvaluation();
+            closeModal('modal-disease');
+            alert('✅ บันทึกข้อมูลโรคเรียบร้อยแล้ว');
+        }
+
+        function deleteDisease(disId) {
+            if (confirm('คุณต้องการลบข้อมูลโรคนี่ออกจากระบบประเมินใช่หรือไม่?')) {
+                appState.diseases = appState.diseases.filter(d => d.id !== disId);
+                saveStateToStorage();
+                renderAdminDiseasesList();
+                runDiagnosisEvaluation();
+            }
+        }
+
+        function openAddDrugModal() {
+            document.getElementById('modal-drug-title').innerText = '➕ เพิ่มรายการยา & สารเสริมใหม่';
+            document.getElementById('edit-drug-id').value = '';
+            document.getElementById('edit-drug-trade').value = '';
+            document.getElementById('edit-drug-generic').value = '';
+            document.getElementById('edit-drug-category').value = 'antibiotic_inject';
+            document.getElementById('edit-drug-route').value = 'inject';
+            document.getElementById('edit-drug-withdrawal').value = '7';
+            document.getElementById('edit-drug-dose-inject').value = '1.0';
+            document.getElementById('edit-drug-dose-oral').value = '1.0';
+            document.getElementById('edit-drug-indication').value = '';
+            document.getElementById('edit-drug-directions').value = '';
+            document.getElementById('edit-drug-image').value = '';
+
+            document.getElementById('modal-drug').classList.remove('hidden');
+        }
+
+        function openEditDrugModal(drugId) {
+            const drug = appState.drugs.find(d => d.id === drugId);
+            if (!drug) return;
+
+            document.getElementById('modal-drug-title').innerText = '✏️ แก้ไขข้อมูลยา & สารเสริม';
+            document.getElementById('edit-drug-id').value = drug.id;
+            document.getElementById('edit-drug-trade').value = drug.tradeName;
+            document.getElementById('edit-drug-generic').value = drug.genericName;
+            document.getElementById('edit-drug-category').value = drug.category;
+            document.getElementById('edit-drug-route').value = drug.route;
+            document.getElementById('edit-drug-withdrawal').value = drug.withdrawalDays || 0;
+            document.getElementById('edit-drug-dose-inject').value = drug.doseInjectPer10kg || 1.0;
+            document.getElementById('edit-drug-dose-oral').value = drug.doseWaterPerL || drug.doseFeedPerTon || 1.0;
+            document.getElementById('edit-drug-indication').value = drug.indication;
+            document.getElementById('edit-drug-directions').value = drug.directions;
+            document.getElementById('edit-drug-image').value = drug.image || '';
+
+            document.getElementById('modal-drug').classList.remove('hidden');
+        }
+
+        function saveDrugFromModal(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-drug-id').value || ('drug_' + Date.now());
+            const tradeName = document.getElementById('edit-drug-trade').value.trim();
+            const genericName = document.getElementById('edit-drug-generic').value.trim();
+            const category = document.getElementById('edit-drug-category').value;
+            const route = document.getElementById('edit-drug-route').value;
+            const withdrawalDays = parseInt(document.getElementById('edit-drug-withdrawal').value || 0);
+            const doseInject = parseFloat(document.getElementById('edit-drug-dose-inject').value || 1.0);
+            const doseOral = parseFloat(document.getElementById('edit-drug-dose-oral').value || 1.0);
+            const indication = document.getElementById('edit-drug-indication').value.trim();
+            const directions = document.getElementById('edit-drug-directions').value.trim();
+            const image = document.getElementById('edit-drug-image').value.trim();
+
+            const drugObj = {
+                id,
+                tradeName,
+                genericName,
+                category,
+                route,
+                withdrawalDays,
+                doseInjectPer10kg: doseInject,
+                doseWaterPerL: route === 'water' ? doseOral : 0,
+                doseFeedPerTon: route === 'feed' ? doseOral : 0,
+                indication,
+                directions,
+                image
+            };
+
+            const existingIndex = appState.drugs.findIndex(d => d.id === id);
+            if (existingIndex >= 0) {
+                appState.drugs[existingIndex] = drugObj;
+            } else {
+                appState.drugs.push(drugObj);
+            }
+
+            saveStateToStorage();
+            populateCalculatorDropdown(id);
+            renderFormularyGrid();
+            renderAdminDrugsTable();
+            closeModal('modal-drug');
+            alert('✅ บันทึกข้อมูลยาเรียบร้อยแล้ว');
+        }
+
+        function deleteDrug(drugId) {
+            if (confirm('คุณต้องการลบรายการยานี้ออกจากระบบใช่หรือไม่?')) {
+                appState.drugs = appState.drugs.filter(d => d.id !== drugId);
+                saveStateToStorage();
+                populateCalculatorDropdown();
+                renderFormularyGrid();
+                renderAdminDrugsTable();
+            }
+        }
+
+        function openFarmSettingsModal() {
+            const f = appState.farmSettings;
+            document.getElementById('setting-farm-name').value = f.name || '';
+            document.getElementById('setting-manager-name').value = f.manager || '';
+            document.getElementById('setting-province').value = f.province || '';
+            document.getElementById('setting-total-heads').value = f.totalHeads || 1000;
+            document.getElementById('modal-farm-settings').classList.remove('hidden');
+        }
+
+        function saveFarmSettings(event) {
+            event.preventDefault();
+            appState.farmSettings = {
+                name: document.getElementById('setting-farm-name').value.trim(),
+                manager: document.getElementById('setting-manager-name').value.trim(),
+                province: document.getElementById('setting-province').value.trim(),
+                totalHeads: parseInt(document.getElementById('setting-total-heads').value || 1000)
+            };
+            saveStateToStorage();
+            updateFarmHeaderDisplay();
+            closeModal('modal-farm-settings');
+            alert('✅ บันทึกข้อมูลฟาร์มเรียบร้อยแล้ว');
+        }
+
+        function updateFarmHeaderDisplay() {
+            const headerFarm = document.getElementById('header-farm-display');
+            const btnFarm = document.getElementById('btn-farm-name');
+            if (headerFarm) headerFarm.innerText = `${appState.farmSettings.name} • ${appState.farmSettings.province}`;
+            if (btnFarm) btnFarm.innerText = appState.farmSettings.name;
+        }
+
+        function getStageThai(stage) {
+            const map = {
+                'all': 'ทุกระยะ',
+                'suckling': 'ลูกสุกรดูดนม',
+                'nursery': 'สุกรอนุบาล',
+                'grower': 'สุกรรุ่น-ขุน',
+                'sow': 'แม่พันธุ์/พ่อพันธุ์'
+            };
+            return map[stage] || stage;
+        }
+
+        function getSeverityBadge(sev) {
+            if (sev === 'high') return 'bg-red-100 text-red-800 border border-red-200';
+            if (sev === 'medium') return 'bg-amber-100 text-amber-800 border border-amber-200';
+            return 'bg-emerald-100 text-emerald-800 border border-emerald-200';
+        }
+
+        function getSeverityThai(sev) {
+            if (sev === 'high') return '🔴 รุนแรงมาก / เฉียบพลัน';
+            if (sev === 'medium') return '🟡 ปานกลาง / เรื้อรัง';
+            return '🟢 เฝ้าระวัง';
+        }
+
+        function getRouteThai(route) {
+            const map = {
+                'inject': '💉 ฉีดรายตัว (IM/SC)',
+                'water': '💧 ละลายน้ำดื่ม',
+                'feed': '🌾 ผสมอาหาร'
+            };
+            return map[route] || route;
+        }
+
+        function getCategoryThai(cat) {
+            const map = {
+                'antibiotic_inject': 'ยาปฏิชีวนะชนิดฉีด',
+                'water_soluble': 'ยาปฏิชีวนะละลายน้ำ',
+                'feed_premix': 'ยาผสมอาหาร (Premix)',
+                'nsaid': 'ยาลดไข้-แก้ปวด-ต้านการอักเสบ',
+                'supplement': 'สารเสริม / วิตามิน / กรดอินทรีย์',
+                'antiparasitic': 'ยากำจัดพยาธิและไร',
+                'hormone': 'ฮอร์โมนเร่งคลอด'
+            };
+            return map[cat] || cat;
+        }
+    // ================= MASTER DEFAULT DATABASE =================
+    // ชุดข้อมูลมาตรฐาน GAP แยกตามระยะการเลี้ยง
+    const stageStandardsData = {
+        all: {
+            title: "มาตรฐานการจัดการ : ทุกระยะการเลี้ยง (ภาพรวมฟาร์ม)",
+            temp: "22 - 28 °C",
+            tempSub: "ควบคุมอุณหภูมิตามช่วงอายุกลุ่มส่วนใหญ่",
+            wind: "0.2 - 2.0 m/s",
+            feed: "ปรับตามน้ำหนักตัว",
+            water: "กินอิสระตลอดวัน"
+        },
+        suckling: {
+            title: "มาตรฐานการจัดการ : ลูกสุกรดูดนม (0 - 3 สัปดาห์)",
+            temp: "32 - 34 °C",
+            tempSub: "ต้องการกกความอบอุ่น ห้ามโดนลมเป่าตรง",
+            wind: "0.1 - 0.2 m/s",
+            feed: "นมแม่ / อาหารเลียราง (Pre-starter)",
+            water: "0.5 - 1.0 ลิตร/วัน"
+        },
+        nursery: {
+            title: "มาตรฐานการจัดการ : สุกรอนุบาล (3 - 10 สัปดาห์)",
+            temp: "27 - 30 °C",
+            tempSub: "ระวังอากาศเปลี่ยนฉับพลันหลังหย่านม",
+            wind: "0.2 - 0.4 m/s",
+            feed: "0.5 - 1.5 กก./วัน",
+            water: "1.5 - 4.0 ลิตร/วัน"
+        },
+        grower: {
+            title: "มาตรฐานการจัดการ : สุกรรุ่น-สุกรขุน (30 - 110+ กก.)",
+            temp: "24 - 27 °C",
+            tempSub: "ห้ามเกิน 30°C เสี่ยง Heat stress",
+            wind: "1.5 - 2.0 m/s",
+            feed: "1.8 - 3.0 กก./วัน",
+            water: "6 - 10 ลิตร/วัน"
+        },
+        sow: {
+            title: "มาตรฐานการจัดการ : แม่พันธุ์อุ้มท้อง-เลี้ยงลูก & พ่อพันธุ์",
+            temp: "22 - 25 °C",
+            tempSub: "แม่เลี้ยงลูกต้องการอากาศเย็นเพื่อกระตุ้นการกินอาหาร",
+            wind: "1.0 - 1.5 m/s",
+            feed: "2.0 - 6.0 กก./วัน (ตามระยะ)",
+            water: "15 - 30 ลิตร/วัน"
+        }
+    };
+
+    function selectDiagStage(stageKey) {
+        // ดึงข้อมูลตาม Key ที่เลือก ถ้าไม่มีให้ใช้ค่าเริ่มต้น (all)
+        const data = stageStandardsData[stageKey] || stageStandardsData['all'];
+    
+        // 1. ตรวจสอบและอัปเดตข้อความลงบน HTML (มีระบบตรวจเช็กป้องกันโค้ดพัง)
+        if(document.getElementById('std-stage-title')) document.getElementById('std-stage-title').innerText = data.title;
+        if(document.getElementById('std-temp')) document.getElementById('std-temp').innerText = data.temp;
+        if(document.getElementById('std-temp-sub')) document.getElementById('std-temp-sub').innerText = data.tempSub;
+        if(document.getElementById('std-wind')) document.getElementById('std-wind').innerText = data.wind;
+        if(document.getElementById('std-feed')) document.getElementById('std-feed').innerText = data.feed;
+        if(document.getElementById('std-water')) document.getElementById('std-water').innerText = data.water;
+    
+        // 2. ปรับเปลี่ยนสไตล์ของปุ่มกด โดยหาจากปุ่มทั้งหมดที่อยู่ในกล่อง #diag-stage-buttons
+        const container = document.getElementById('diag-stage-buttons');
+        if (container) {
+            const allButtons = container.getElementsByTagName('button');
+            for (let btn of allButtons) {
+                // ลบสไตล์ Active ออก และเปลี่ยนกลับเป็นสีเทาปกติ
+                btn.classList.remove('active', 'border-emerald-600', 'bg-emerald-50/80', 'text-emerald-900');
+                btn.classList.add('border-slate-200', 'text-slate-700');
+            }
+        }
+    
+        // 3. ใส่สไตล์ Active ให้กับปุ่มที่เพิ่งถูกคลิก (หาจาก event.currentTarget หรือระบุตรงๆ)
+        // เพื่อป้องกันความผิดพลาด จะหาจาก Element ที่มีฟังก์ชันคลิกตรงกับสเตจนั้นๆ
+        const targetBtn = Array.from(document.querySelectorAll(`#diag-stage-buttons button`)).find(btn => 
+            btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${stageKey}'`)
+        );
+
+        if (targetBtn) {
+            targetBtn.classList.add('active', 'border-emerald-600', 'bg-emerald-50/80', 'text-emerald-900');
+            targetBtn.classList.remove('border-slate-200', 'text-slate-700');
+        }
+    }
+    </script>
+</body>
+</html>
