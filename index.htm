@@ -264,19 +264,46 @@
                     </div>
 
                     <!-- Administration Route -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">2. ช่องทางการให้ยา</label>
-                        <div class="grid grid-cols-3 gap-2" id="calc-route-selector">
-                            <button type="button" onclick="setCalcRoute('inject')" id="route-btn-inject" class="route-btn p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold text-xs text-center transition-all">
-                                💉 ฉีดรายตัว<br><span class="text-[9px] font-normal text-slate-500">เข้ากล้ามเนื้อ</span>
-                            </button>
-                            <button type="button" onclick="setCalcRoute('water')" id="route-btn-water" class="route-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all">
-                                💧 ละลายน้ำกิน<br><span class="text-[9px] font-normal text-slate-400">ละลายน้ำกิน</span>
-                            </button>
-                            <button type="button" onclick="setCalcRoute('feed')" id="route-btn-feed" class="route-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all">
-                                🌾 ผสมอาหาร<br><span class="text-[9px] font-normal text-slate-400">ผสมอาหาร</span>
-                            </button>
-                        </div>
+
+                    <div class="grid grid-cols-3 gap-2" id="calc-route-selector">
+                        <button
+                            type="button"
+                            onclick="setCalcRoute('inject')"
+                            id="route-btn-inject"
+                            data-route-group="inject"
+                            class="route-btn p-3 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold text-xs text-center transition-all"
+                        >
+                            💉 ฉีดรายตัว<br>
+                            <span class="text-[9px] font-normal text-slate-500">
+                                เข้ากล้ามเนื้อ
+                            </span>
+                        </button>
+                    
+                        <button
+                            type="button"
+                            onclick="setCalcRoute('water')"
+                            id="route-btn-water"
+                            data-route-group="water"
+                            class="route-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all"
+                        >
+                            💧 ละลายน้ำกิน<br>
+                            <span class="text-[9px] font-normal text-slate-400">
+                                ละลายน้ำกิน
+                            </span>
+                        </button>
+                    
+                        <button
+                            type="button"
+                            onclick="setCalcRoute('feed')"
+                            id="route-btn-feed"
+                            data-route-group="feed"
+                            class="route-btn p-3 rounded-2xl border border-slate-200 text-slate-700 font-bold text-xs text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all"
+                        >
+                            🌾 ผสมอาหาร<br>
+                            <span class="text-[9px] font-normal text-slate-400">
+                                ผสมอาหาร
+                            </span>
+                        </button>
                     </div>
 
                     <!-- Herd & Body Weight Info -->
@@ -774,7 +801,7 @@
                 tradeName: 'เวทตริม็อกซิน แอล.เอ.',
                 genericName: 'Vetrimoxin L.A. 15%',
                 category: 'antibiotic_inject',
-                route: 'inject',
+                route: 'inject_1',
                 doseInjectPer10kg: 1.0,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
@@ -788,7 +815,7 @@
                 tradeName: 'เพนไดสเตรป แอล.เอ.',
                 genericName: 'Pendistrep L.A.',
                 category: 'antibiotic_inject',
-                route: 'inject',
+                route: 'inject_2',
                 doseInjectPer10kg: 0.5,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
@@ -858,7 +885,7 @@
                 tradeName: 'เอ็กซีด',
                 genericName: 'Excede',
                 category: 'restrict',
-                route: 'inject',
+                route: 'inject_Once',
                 doseInjectPer10kg: 0.5,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
@@ -872,7 +899,7 @@
                 tradeName: 'ทูลาโทรมัยซิน 10%',
                 genericName: 'Draxxin / Tulissin',
                 category: 'restrict',
-                route: 'inject',
+                route: 'inject_Once',
                 doseInjectPer10kg: 0.25,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
@@ -1101,7 +1128,7 @@
                 tradeName: 'เบซเตอร์ อนาลจิน 500 (Bezter Analgin)',
                 genericName: 'Metamizole (Dipyrone) 500 mg/ml',
                 category: 'nsaid',
-                route: 'inject',
+                route: 'inject_BID',
                 doseInjectPer10kg: 0.5,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
@@ -1115,8 +1142,8 @@
                 tradeName: 'คีโตโปรเฟน 10% (Kelaprofen / Ketoprig)',
                 genericName: 'Ketoprofen 100 mg/ml',
                 category: 'nsaid',
-                route: 'inject',
-                doseInjectPer10kg: 0.3,
+                route: 'inject_BI',
+                doseInjectPer10kg: 0.30,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
                 withdrawalDays: 4,
@@ -2499,13 +2526,30 @@
             return '🟢 เฝ้าระวัง';
         }
 
+
         function getRouteThai(route) {
             const map = {
-                'inject': '💉 ฉีดรายตัว (IM/SC)',
+                'inject': '💉 ฉีดวันละครั้ง 3-5 เข็ม',
+                'inject_once': '💉 ฉีดครั้งเดียว',
+                'inject_1': '💉 ฉีดวันเว้นวัน ต่อเนื่อง 3-5 เข็ม',
+                'inject_2': '💉 ฉีดวันเว้น 2 วัน ต่อเนื่อง 2-5 เข็ม',
+                'inject_bid': '💉 ฉีดห่างจากเข็มแรก 8 ชม. ต่อเนื่อง 3-5 เข็ม',
+                'inject_bi': '💉 ฉีดวันละครั้ง 1-2 เข็ม',
                 'water': '💧 ละลายน้ำดื่ม',
                 'feed': '🌾 ผสมอาหาร'
             };
-            return map[route] || route;
+        
+            const value = String(route || '').trim();
+            const key = value.toLowerCase();
+        
+            // รองรับชื่อแบบ injection_1 และ injection_2
+            const normalizedKey = key.replace(/^injection(?=_|$)/, 'inject');
+        
+            return map[normalizedKey] || map[key] || (
+                normalizeCalcRoute(value) === 'inject'
+                    ? map['inject']
+                    : value
+            );
         }
 
         function getCategoryThai(cat) {
@@ -2600,6 +2644,50 @@
             targetBtn.classList.remove('border-slate-200', 'text-slate-700');
         }
     }
+    
+        function normalizeCalcRoute(route) {
+            const value = String(route || '').trim().toLowerCase();
+        
+            // injection, injection_1, inject_2, inject_BID
+            if (/^inject(?:ion)?(?:_|$)/i.test(value)) {
+                return 'inject';
+            }
+        
+            if (value === 'water' || value.startsWith('water_')) {
+                return 'water';
+            }
+        
+            if (value === 'feed' || value.startsWith('feed_')) {
+                return 'feed';
+            }
+        
+            return value;
+        }
+        
+        function setCalcRoute(route) {
+            const selectedRoute = normalizeCalcRoute(route);
+        
+            document.querySelectorAll('#calc-route-selector .route-btn')
+                .forEach(button => {
+                    const isActive =
+                        button.dataset.routeGroup === selectedRoute;
+        
+                    button.classList.toggle('border-2', isActive);
+                    button.classList.toggle('border-emerald-600', isActive);
+                    button.classList.toggle('bg-emerald-50', isActive);
+                    button.classList.toggle('text-emerald-900', isActive);
+        
+                    button.classList.toggle('border', !isActive);
+                    button.classList.toggle('border-slate-200', !isActive);
+                    button.classList.toggle('text-slate-700', !isActive);
+                });
+        
+            // เก็บค่าเป็นหมวดหลัก เพื่อให้ Logic เดิมทำงานต่อได้
+            window.calcRoute = selectedRoute;
+        
+            // เรียกฟังก์ชันคำนวณหรือกรองรายการยาตัวเดิม
+            // ตามชื่อฟังก์ชันที่โปรเจกต์ใช้อยู่
+        }
     </script>
 </body>
 </html>
