@@ -212,7 +212,7 @@
                                 <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                                     📊 ผลการประเมินกลุ่มโรค & ยา-สารเสริมที่แนะนำ
                                 </h2>
-                                <p class="text-xs text-slate-500">คำนวณจาก Matched Matrix และหลักเภสัชวิทยาเวชกรรมสุกร</p>
+                                <p class="text-xs text-slate-500">คำนวณจาก Matched Matrix และสัตวแพทย์ผู้ควบคุมฟาร์มสุกร</p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span id="diag-result-badge" class="px-3 py-1 bg-slate-100 text-slate-600 font-bold text-xs rounded-full">
@@ -344,19 +344,19 @@
                             <div class="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/80 text-center">
                                 <span class="text-xs font-semibold text-emerald-800 block">ปริมาณยาต่อตัว</span>
                                 <span class="text-3xl font-extrabold text-emerald-700 my-1 block tracking-tight" id="calc-val-per-head">3.50</span>
-                                <span class="text-[11px] font-medium text-emerald-600" id="calc-unit-per-head">ml / ตัว</span>
+                                <span class="text-[11px] font-medium text-emerald-600" id="calc-unit-per-head">ซี.ซี. / ตัว</span>
                             </div>
 
                             <div class="p-4 rounded-2xl bg-gradient-to-br from-teal-50 to-cyan-50 border border-teal-200/80 text-center">
                                 <span class="text-xs font-semibold text-teal-800 block">ปริมาณยารวมต่อวัน</span>
                                 <span class="text-3xl font-extrabold text-teal-700 my-1 block tracking-tight" id="calc-val-per-day">175.0</span>
-                                <span class="text-[11px] font-medium text-teal-600" id="calc-unit-per-day">ml / วัน (50 ตัว)</span>
+                                <span class="text-[11px] font-medium text-teal-600" id="calc-unit-per-day">ซี.ซี. / วัน (50 ตัว)</span>
                             </div>
 
                             <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 text-center">
                                 <span class="text-xs font-semibold text-slate-700 block">ปริมาณยารวมตลอดการรักษา</span>
                                 <span class="text-3xl font-extrabold text-slate-800 my-1 block tracking-tight" id="calc-val-grand-total">525.0</span>
-                                <span class="text-[11px] font-medium text-slate-500" id="calc-unit-grand-total">ml (สำหรับ 3 วัน)</span>
+                                <span class="text-[11px] font-medium text-slate-500" id="calc-unit-grand-total">ซี.ซี. (สำหรับ 3 วัน)</span>
                             </div>
                         </div>
 
@@ -425,6 +425,7 @@
                     <button onclick="filterFormularyCategory('nsaid')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🩹 ลดไข้-ลดอักเสบ</button>
                     <button onclick="filterFormularyCategory('supplement')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🧪 สารเสริม/วิตามิน</button>
                     <button onclick="filterFormularyCategory('antiparasitic')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🪱 กำจัดพยาธิ/ไร</button>
+                    <button onclick="filterFormularyCategory('restrict')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap">🚨 ควบคุมพิเศษ</button>
                 </div>
                 <div class="w-full md:w-72">
                     <input type="text" id="formulary-search" oninput="renderFormularyGrid()" placeholder="🔍 ค้นหาชื่อยา, ตัวยาสำคัญ, สรรพคุณ..." class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
@@ -677,6 +678,7 @@
                             <option value="supplement">🧪 สารเสริม / วิตามิน / กรดอินทรีย์</option>
                             <option value="antiparasitic">🪱 ยาถ่ายพยาธิ / กำจัดไร</option>
                             <option value="hormone">🧬 ฮอร์โมนเร่งคลอด/ขับน้ำคาวปลา</option>
+                            <option value="restrict">🔒 ยาควบคุมพิเศษ</option>
                         </select>
                     </div>
                     <div>
@@ -739,16 +741,16 @@
             <form onsubmit="saveFarmSettings(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">ชื่อฟาร์มสุกร</label>
-                    <input type="text" id="setting-farm-name" required value="สว่างฟาร์มสุกรมาตรฐาน GAP" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
+                    <input type="text" id="setting-farm-name" required value="ลงทะเบียนฟาร์ม" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">ชื่อผู้จัดการฟาร์ม / สัตวบาล</label>
-                    <input type="text" id="setting-manager-name" required value="คุณสมศักดิ์ นิลเจริญ" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
+                    <input type="text" id="setting-manager-name" required value="ชื่อ-นามสกุล" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">จังหวัด</label>
-                        <input type="text" id="setting-province" required value="ราชบุรี" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
+                        <input type="text" id="setting-province" required value="กรุงเทพ" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">จำนวนสุกรทั้งหมด (ตัว)</label>
@@ -769,17 +771,73 @@
             // 1. Injectable Antibiotics
             {
                 id: 'amox_15_la',
-                tradeName: 'แอมม็อกซี่ 15% LA (Amoxy LA)',
-                genericName: 'Amoxicillin Trihydrate 150 mg/ml',
+                tradeName: 'เวทตริม็อกซิน แอล.เอ.',
+                genericName: 'Vetrimoxin L.A. 15%',
                 category: 'antibiotic_inject',
                 route: 'inject',
                 doseInjectPer10kg: 1.0,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
+                withdrawalDays: 21,
+                indication: 'รักษาแผลอักเสบ , ฝี , หนอง , ข้ออักเสบ , ขาเจ็บ , ไอ หอบ , มดลูกอักเสบ และเต้านมอักเสบ',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) บริเวณหลังใบหู 1 ซี.ซี. ต่อน้ำหนักตัว 10 กก. ออกฤทธิ์ยาว 48 ชม. หากจำเป็นฉีดซ้ำได้ใน 48 ชม.',
+                image: 'https://cdn.alpha-vet.hu/termek-kepek/webp/550x550/vetrimoxin-la-clas-injekcio-250-ml-san9_1.webp'
+            },
+            {
+                id: 'pendistrep_la',
+                tradeName: 'เพนไดสเตรป แอล.เอ.',
+                genericName: 'Pendistrep L.A.',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 21,
+                indication: 'ใช้รักษาโรคติดเชื้อระบบทางเดินหายใจ ปอดบวม หนอง ฝี ผิวหนังอักเสบ ขาเจ็บ ข้อบวม ป้องกันการติดเชื้อหลังผ่าตัด',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20-40 กก. ฉีดวันเว้น 2 วัน ติดต่อกัน 3 เข็ม ระวังการแพ้ยา',
+                image: 'https://www.oblivestock.com/wp-content/uploads/2021/05/Pendistrep-2.jpeg'
+            },
+                        {
+                id: 'bezter_kana_250',
+                tradeName: 'เบซเตอร์ กานา 250',
+                genericName: 'Bezter Kana 250',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 10,
+                indication: 'ใช้รักษาอาการท้องเสีย ระบบทางเดินอาหารอักเสบ',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. วันละครั้ง ติดต่อกัน 3-5 วัน ระวังพิษต่อไต (Nephrotoxic)',
+                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+            },
+            {
+                id: 'genta_50_inj',
+                tradeName: 'เจนต้า 50',
+                genericName: 'Genta 50',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.4,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 45,
+                indication: 'ใช้ควบคุม/รักษาโรคติดเชื้อระบบทางเดินหายใจ และทางเดินอาหารจากเชื้อ E.coli, Salmonella',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 25 กก. วันละ 2 ครั้ง หรือ 1 ซี.ซี. / 10 กก. วันละครั้ง ติดต่อกัน 3-5 วัน',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbJ24yZy1AZEJBGpXtsGs-EqEU4u-TZMHXIsp_w94mbqbWxDh-ak_QC6FV&s=10'
+            },
+                        {
+                id: 'dynamutilin_20_inj',
+                tradeName: 'ไดนามูทิลิน 20%',
+                genericName: 'Dynamutilin 20%',
+                category: 'antibiotic_inject',
+                route: 'inject',
+                doseInjectPer10kg: 0.5,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
                 withdrawalDays: 14,
-                indication: 'ข้ออักเสบ (Strep. suis), ปอดบวม, ทางเดินปัสสาวะและมดลูกอักเสบ (MMA)',
-                directions: 'ฉีดเข้ากล้ามเนื้อลึก (IM) บริเวณหลังใบหู 1 ml ต่อน้ำหนักตัว 10 กก. ออกฤทธิ์ยาว 48 ชม. หากจำเป็นฉีดซ้ำได้ใน 48 ชม.',
-                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+                indication: 'โรคปอดบวม-ข้อบวม จากเชื้อมัยโคพลาสมา โรคบิดมูกเลือด (Swine Dysentery)',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. ฉีดวันละครั้ง ติดต่อกัน 3-5 วัน (กรณีบิดมูกเลือดฉีด 1 ครั้ง) *ห้ามใช้ร่วมกับกลุ่ม Ionophores*',
+                image: 'https://tienphatvethcm.com.vn/wp-content/uploads/2021/11/quy-cach-dac-tri-benh-viem-phoi-DYNAMUTILIN.jpg'
             },
             {
                 id: 'florfenicol_300',
@@ -795,34 +853,35 @@
                 directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ml ต่อน้ำหนักตัว 15 กก. วันละครั้ง ติดต่อกัน 2 วัน หรือฉีดเข้าใต้ผิวหนัง (SC) ขนานเดียว',
                 image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
             },
-            {
-                id: 'tulathromycin_100',
-                tradeName: 'ทูลาโทรมัยซิน 10% (Draxxin / Tulissin)',
-                genericName: 'Tulathromycin 100 mg/ml',
-                category: 'antibiotic_inject',
-                route: 'inject',
-                doseInjectPer10kg: 0.25,
-                doseWaterPerL: 0,
-                doseFeedPerTon: 0,
-                withdrawalDays: 13,
-                indication: 'ปอดบวมรุนแรง Mycoplasma, APP, Bordetella ฉีดเพียงเข็มเดียวคุมได้ 10-14 วัน',
-                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) หลังใบหูเพียงครั้งเดียว ขนาด 1 ml ต่อน้ำหนักตัว 40 กก. (0.25 ml / 10 kg)',
-                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
-            },
-            {
+                        {
                 id: 'excede_ceftiofur',
-                tradeName: 'เอ็กซีด (Excede)',
-                genericName: 'Ceftiofur crystalline free acid 100 mg/ml',
-                category: 'antibiotic_inject',
+                tradeName: 'เอ็กซีด',
+                genericName: 'Excede',
+                category: 'restrict',
                 route: 'inject',
                 doseInjectPer10kg: 0.5,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
-                withdrawalDays: 20,
+                withdrawalDays: 28,
                 indication: 'ใช้รักษาโรคในระบบทางเดินหายใจที่เกิดจากเชื้อ APP, Pasteurellosis, Glasser\'s disease และ Streptococcosis',
                 directions: 'ฉีดเข้ากล้ามเนื้อ (IM) ครั้งเดียว ขนาด 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. (0.5 ml/10 kg) ออกฤทธิ์ยาวนาน 7 วัน',
-                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBn7sIdkX68ip70kl9do0L8m_eTrG1tAK98BaCF4-_QQ&s=10'
             },
+            {
+                id: 'tulathromycin_100',
+                tradeName: 'ทูลาโทรมัยซิน 10%',
+                genericName: 'Draxxin / Tulissin',
+                category: 'restrict',
+                route: 'inject',
+                doseInjectPer10kg: 0.25,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 33,
+                indication: 'ปอดบวมรุนแรง Mycoplasma, APP, Bordetella ฉีดเพียงเข็มเดียวคุมได้ 10-14 วัน',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) หลังใบหูเพียงครั้งเดียว ขนาด 1 ml ต่อน้ำหนักตัว 40 กก. (0.25 ml / 10 kg)',
+                image: 'https://io.convertiez.com.br/m/lojaagropecuaria/shop/products/images/1695/medium/draxxin-50-ml_185754.jpg'
+            },
+
             {
                 id: 'enrofloxacin_10',
                 tradeName: 'เอนโรฟลอกซาซิน 10% (Enro 100)',
@@ -837,19 +896,33 @@
                 directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ml ต่อน้ำหนักตัว 20 กก. (0.5 ml/10 kg) วันละ 1 ครั้ง ต่อเนื่อง 3 วัน',
                 image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
             },
-            {
-                id: 'bezter_kana_250',
-                tradeName: 'เบซเตอร์ กานา 250 (Bezter Kana 250)',
-                genericName: 'Kanamycin 250 mg/ml',
-                category: 'antibiotic_inject',
+                        {
+                id: 'ceftocil',
+                tradeName: 'เซ็ฟโตซิล',
+                genericName: 'Ceftocil',
+                category: 'restrict',
+                route: 'inject',
+                doseInjectPer10kg: 0.625,
+                doseWaterPerL: 0,
+                doseFeedPerTon: 0,
+                withdrawalDays: 5,
+                indication: 'ใช้รักษาโรคในระบบทางเดินหายใจที่เกิดจากเชื้อ APP, Pasteurellosis, Glasser disease และ Streptococcosis',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 16 กก. ติดต่อกัน 3 วัน',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
+            },
+                        {
+                id: 'tylosin',
+                tradeName: 'ทาโลซิน อินเจ็คชั่น',
+                genericName: 'Tarlosine injection',
+                category: 'restrict',
                 route: 'inject',
                 doseInjectPer10kg: 0.5,
                 doseWaterPerL: 0,
                 doseFeedPerTon: 0,
-                withdrawalDays: 10,
-                indication: 'ใช้รักษาอาการท้องเสีย ระบบทางเดินอาหารอักเสบ',
-                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. วันละครั้ง ติดต่อกัน 3-5 วัน ระวังพิษต่อไต (Nephrotoxic)',
-                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
+                withdrawalDays: 9,
+                indication: 'ไอ ท้องเสีย ควบคุมเชื้อระบบทางเดินหายใจและทางเดินอาหารร่วมกัน',
+                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก.',
+                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
             },
             {
                 id: 'bezter_lincospec_150',
@@ -864,48 +937,6 @@
                 indication: 'ไอ ท้องเสีย ควบคุมเชื้อระบบทางเดินหายใจและทางเดินอาหารร่วมกัน',
                 directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 15 กก. หลีกเลี่ยงการใช้งานติดต่อกันเป็นเวลานาน',
                 image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
-            },
-            {
-                id: 'dynamutilin_20_inj',
-                tradeName: 'ไดนามูทิลิน 20% (Dynamutilin 20%)',
-                genericName: 'Tiamulin 200 mg/ml',
-                category: 'antibiotic_inject',
-                route: 'inject',
-                doseInjectPer10kg: 0.5,
-                doseWaterPerL: 0,
-                doseFeedPerTon: 0,
-                withdrawalDays: 14,
-                indication: 'โรคปอดบวม-ข้อบวม จากเชื้อมัยโคพลาสมา โรคบิดมูกเลือด (Swine Dysentery)',
-                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20 กก. ฉีดวันละครั้ง ติดต่อกัน 3-5 วัน (กรณีบิดมูกเลือดฉีด 1 ครั้ง) *ห้ามใช้ร่วมกับกลุ่ม Ionophores*',
-                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
-            },
-            {
-                id: 'genta_50_inj',
-                tradeName: 'เจนต้า 50 (Genta 50 / NAOGEN-100)',
-                genericName: 'Gentamicin 50-100 mg/ml',
-                category: 'antibiotic_inject',
-                route: 'inject',
-                doseInjectPer10kg: 0.4,
-                doseWaterPerL: 0,
-                doseFeedPerTon: 0,
-                withdrawalDays: 45,
-                indication: 'ใช้ควบคุม/รักษาโรคติดเชื้อระบบทางเดินหายใจ และทางเดินอาหารจากเชื้อ E.coli, Salmonella',
-                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 25 กก. วันละ 2 ครั้ง หรือ 1 ซี.ซี. / 10 กก. วันละครั้ง ติดต่อกัน 3-5 วัน',
-                image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=60'
-            },
-            {
-                id: 'pendistrep_la',
-                tradeName: 'เพนไดสเตรป แอล.เอ. (Pendistrep L.A.)',
-                genericName: 'Procaine + Benzathine Benzylpenicillin + Dihydrostreptomycin',
-                category: 'antibiotic_inject',
-                route: 'inject',
-                doseInjectPer10kg: 0.35,
-                doseWaterPerL: 0,
-                doseFeedPerTon: 0,
-                withdrawalDays: 21,
-                indication: 'ใช้รักษาโรคติดเชื้อระบบทางเดินหายใจ ปอดบวม หนอง ฝี ผิวหนังอักเสบ ขาเจ็บ ข้อบวม ป้องกันการติดเชื้อหลังผ่าตัด',
-                directions: 'ฉีดเข้ากล้ามเนื้อ (IM) 1 ซี.ซี. ต่อน้ำหนักตัว 20-40 กก. ฉีดวันเว้น 2 วัน ติดต่อกัน 3 เข็ม ระวังการแพ้ยา',
-                image: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&auto=format&fit=crop&q=60'
             },
             {
                 id: 'synulox_rtu',
@@ -1860,11 +1891,11 @@
                 const mlGrandTotal = mlTotalDay * days;
 
                 if (valPerHeadEl) valPerHeadEl.innerText = mlPerHead.toFixed(2);
-                if (unitPerHeadEl) unitPerHeadEl.innerText = 'ml / ตัว / ครั้ง';
+                if (unitPerHeadEl) unitPerHeadEl.innerText = 'ซี.ซี. / ตัว / ครั้ง';
                 if (valPerDayEl) valPerDayEl.innerText = mlTotalDay.toFixed(1);
-                if (unitPerDayEl) unitPerDayEl.innerText = `ml / วัน (${heads} ตัว)`;
+                if (unitPerDayEl) unitPerDayEl.innerText = `ซี.ซี. / วัน (${heads} ตัว)`;
                 if (valGrandTotalEl) valGrandTotalEl.innerText = mlGrandTotal.toFixed(1);
-                if (unitGrandTotalEl) unitGrandTotalEl.innerText = `ml (รวม ${days} วัน)`;
+                if (unitGrandTotalEl) unitGrandTotalEl.innerText = `ซี.ซี. (รวม ${days} วัน)`;
             } else if (route === 'water') {
                 if (intakeHelper) intakeHelper.classList.remove('hidden');
                 const dosePerL = drug.doseWaterPerL || 0.5;
@@ -2485,7 +2516,8 @@
                 'nsaid': 'ยาลดไข้-แก้ปวด-ต้านการอักเสบ',
                 'supplement': 'สารเสริม / วิตามิน / กรดอินทรีย์',
                 'antiparasitic': 'ยากำจัดพยาธิและไร',
-                'hormone': 'ฮอร์โมนเร่งคลอด'
+                'hormone': 'ฮอร์โมนเร่งคลอด',
+                'restrict': 'ยาควบคุมพิเศษ'
             };
             return map[cat] || cat;
         }
